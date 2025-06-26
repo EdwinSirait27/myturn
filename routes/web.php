@@ -226,7 +226,7 @@ Route::middleware(['auth', 'role:Admin|HeadHR|HR|Buyer|HeadBuyer'])->group(funct
         // Route::get('Vendorgroup/create', [VendorgroupController::class, 'create'])->name('Vendorgroup.create');
         // Route::post('/Vendorgroup', [VendorgroupController::class, 'store'])->name('Vendorgroup.store');
         Route::get('/Vendor/edit/{hashedId}', [VendorController::class, 'edit'])->name('Vendor.edit');
-        Route::get('Vendor/create', [VendorController::class, 'create'])->name('Vendor.create');
+        Route::get('Vendor/create/{hashedId}', [VendorController::class, 'create'])->name('Vendor.create');
         Route::post('/Vendor', [VendorController::class, 'store'])->name('Vendor.store');
         Route::get('vendor/vendor/data', [VendorController::class, 'logs'])->name('vendor.vendor');
         

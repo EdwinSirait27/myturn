@@ -205,6 +205,8 @@
 
                                     <form id="vendor-create" action="{{ route('Vendor.store') }}" method="POST">
                                         @csrf
+                                        <input type="hidden" name="vendor_group_id" value="{{ $vendorgroup->id }}">
+
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <div class="form-group">
@@ -278,9 +280,10 @@
                                         </div>
 
                                         <div class="d-flex justify-content-end mt-4">
-                                            <a href="{{ route('pages.Department') }}" class="btn btn-secondary">
-                                                <i class="fas fa-times"></i> {{ __('Cancel') }}
-                                            </a>
+                                          <a href="{{ route('Vendorgroup.detail', ['hashedId' => $hashedId]) }}" class="btn btn-secondary">
+    <i class="fas fa-arrow-left"></i> Back
+</a>
+
                                             <button type="submit" id="create-btn" class="btn bg-primary">
                                                 <i class="fas fa-save"></i> {{ __('Create') }}
                                             </button>

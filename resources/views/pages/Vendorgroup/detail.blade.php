@@ -209,10 +209,15 @@
                                     </table>
                                 </div>
                                 <div class="action-buttons">
-                                    <button type="button" onclick="window.location='{{ route('Vendor.create') }}'"
-                                        class="btn btn-primary btn-sm">
-                                        <i class="fas fa-plus-circle"></i> Create Vendor on {{ $vendorgroup->name }}
-                                    </button>
+                                      <a href="{{ route('pages.Vendorgroup') }}" class="btn btn-secondary">
+                                                <i class="fas fa-times"></i> {{ __('Cancel') }}
+                                            </a>
+                                 <button type="button"
+    onclick="window.location='{{ route('Vendor.create', ['hashedId' => $hashedId]) }}'"
+    class="btn btn-primary btn-sm">
+    <i class="fas fa-plus-circle"></i> Create Vendor on {{ $vendorgroup->name }}
+</button>
+
 
 
                                 </div>
