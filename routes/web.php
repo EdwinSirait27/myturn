@@ -229,7 +229,8 @@ Route::middleware(['auth', 'role:Admin|HeadHR|HR|Buyer|HeadBuyer'])->group(funct
         Route::get('Vendor/create/{hashedId}', [VendorController::class, 'create'])->name('Vendor.create');
         Route::post('/Vendor', [VendorController::class, 'store'])->name('Vendor.store');
         Route::get('vendor/vendor/data', [VendorController::class, 'logs'])->name('vendor.vendor');
-        
+        Route::get('/vendor/filters/{hashedId}', [VendorController::class, 'getVendorFilters'])->name('vendor.filters');
+
         // Route::get('/Vendorgroup/detail/{hashedId}', [VendorController::class, 'detail'])->name('Vendorgroup.detail');
         // Route::put('/Vendorgroup/{hashedId}', [VendorgroupController::class, 'update'])->name('Vendorgroup.update');
         // Route::get('/vendorgroups/vendorgroups', [VendorgroupController::class, 'getVendorgroups'])->name('vendorgroups.vendorgroups');

@@ -4,6 +4,8 @@
     <link rel="stylesheet" href="{{ asset('library/jqvmap/dist/jqvmap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('library/summernote/dist/summernote-bs4.min.css') }}">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
 @endpush
 <style>
     /* Card Styles */
@@ -170,6 +172,42 @@
             <div class="section-header">
                 <h1>Vendor Groups {{ $vendorgroup->name }}</h1>
             </div>
+         <div class="row mb-3">
+    <div class="col-md-3">
+        <label for="filter-type">Filter Type</label>
+        <select id="filter-type" class="form-control select2">
+            <option value="">All Types</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label for="filter-consignment">Filter is Consignment</label>
+        <select id="filter-consignment" class="form-control select2">
+            <option value="">All</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label for="filter-vendorpkp">Filter is Vendor PKP</label>
+        <select id="filter-vendorpkp" class="form-control select2">
+            <option value="">All</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label for="filter-bank">Filter Banks</label>
+        <select id="filter-bank" class="form-control select2">
+            <option value="">All Banks</option>
+        </select>
+    </div>
+</div>
+
+
+{{-- <select id="filter-consignment" class="form-control">
+    <option value="">All Consignment</option>
+</select>
+
+<select id="filter-vendorpkp" class="form-control">
+    <option value="">All PKP</option>
+</select> --}}
+
             <div class="section-body">
                 <div class="row">
                     <div class="col-12">
@@ -256,6 +294,26 @@
 @push('scripts')
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#type').select2({
+                placeholder: 'Choose Type',
+                allowClear: true,
+                width: '100%'
+            });
+            $('#consignment').select2({
+                placeholder: 'Choose Consignment',
+                allowClear: true,
+                width: '100%'
+            });
+            $('#vendorpkp').select2({
+                placeholder: 'Choose Vendorpkp',
+                allowClear: true,
+                width: '100%'
+            });
+        });
+    </script>
     <script>
         $(document).ready(function() {
             $('#logTable').DataTable({
@@ -294,14 +352,42 @@
     </script>
     <script>
         jQuery(document).ready(function($) {
+              const hashedId = "{{ $hashedId }}"; // pastikan variabel ini dikirim dari controller
+
+        // Load filter options
+        $.get(`/vendor/filters/${hashedId}`, function (data) {
+            // Populate type options
+            data.types.forEach(type => {
+                $('#filter-type').append(`<option value="${type}">${type}</option>`);
+            });
+            data.consignments.forEach(consignment => {
+                $('#filter-consignment').append(`<option value="${consignment}">${consignment}</option>`);
+            });
+            data.vendorpkps.forEach(vendorpkp => {
+                $('#filter-vendorpkp').append(`<option value="${vendorpkp}">${vendorpkp}</option>`);
+            });
+             data.banks.forEach(bank => {
+        $('#filter-bank').append(`<option value="${bank}">${bank}</option>`);
+    });
+        });
             var table = $('#users-table').DataTable({
                 processing: true,
                 serverSide: true,
+                 scrollX: true,
                 ajax: {
                     url: '{{ route('vendors.vendors', $vendorgroup->id_hashed) }}',
-                    type: 'GET'
+                    type: 'GET',
+                       data: function (d) {
+                d.type = $('#filter-type').val();
+                d.consignment = $('#filter-consignment').val();
+                d.vendorpkp = $('#filter-vendorpkp').val();
+                d.name = $('#filter-bank').val();
+
+                // d.consignment = $('#filter-consignment').val();
+                // d.vendorpkp = $('#filter-vendorpkp').val();
+            }
                 },
-                responsive: false,
+                responsive: true,
                 lengthMenu: [
                     [10, 25, 50, 100, -1],
                     [10, 25, 50, 100, "All"]
@@ -414,11 +500,17 @@
                         defaultContent: '-'
                     },
                     {
-                        data: 'bank_id',
-                        name: 'bank_id',
+                        data: 'banks.name',
+                        name: 'banks.name',
                         className: 'text-center',
                         defaultContent: '-'
                     },
+                    // {
+                    //     data: 'bank_id',
+                    //     name: 'bank_id',
+                    //     className: 'text-center',
+                    //     defaultContent: '-'
+                    // },
                     {
                         data: 'description',
                         name: 'description',
@@ -438,6 +530,9 @@
                     $('.dataTables_length select').addClass('form-control');
                 }
             });
+            $('#filter-type, #filter-consignment, #filter-vendorpkp, #filter-bank').change(function () {
+            table.ajax.reload();
+        });
 
             @if (session('success'))
                 Swal.fire({

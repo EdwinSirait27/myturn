@@ -12,7 +12,7 @@ return new class extends Migration
         Schema::create('vendorgroups', function (Blueprint $table) {
             $table->id(); 
              $table->string('name')->unique()->index(); // nama group, misal "Supplier Bahan Baku"
-            $table->int('code')->nullable();
+            $table->int('code')->nullable()->unique();
             $table->text('description')->nullable();
             $table->timestamps();
         });

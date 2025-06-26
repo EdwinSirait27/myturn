@@ -178,7 +178,7 @@ class VendorgroupController extends Controller
                 ->max(DB::raw('CAST(code AS UNSIGNED)'));
 
             $nextNumber = ($lastCode ?? 0) + 1;
-            $nextCode = str_pad($nextNumber, 5, '0', STR_PAD_LEFT); // Jadi 00001, 00002, dll
+            $nextCode = str_pad($nextNumber, 4, '0', STR_PAD_LEFT); // Jadi 00001, 00002, dll
 
             Vendorgroup::create([
                 'name' => strtoupper($validated['name']),

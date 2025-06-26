@@ -16,20 +16,7 @@ use Spatie\Activitylog\Models\Activity;
 
 class VendorController extends Controller
 {
-//     public function create()
-// {
-//    $types = [
-//     'Regular Vendor',
-//     'Consignment',
-//     'Consignment Open Price',
-//     'General Allocation',
-// ];
-//          $vendors = Vendorgroup::select('id', 'name','code')->get();
-//          $countrys = Country::select('id', 'country_name')->get();
-//          $stores = Stores::select('id', 'name')->get();
-//          $banks = Banks::select('id', 'name')->get();
-//     return view('pages.Vendor.create', compact('vendors','countrys','stores','banks','types')); 
-// }
+
 public function create($hashedId)
 {
     $vendorgroup = Vendorgroup::get()->first(function ($u) use ($hashedId) {
@@ -46,13 +33,22 @@ public function create($hashedId)
         'Consignment Open Price',
         'General Allocation',
     ];
+    $consis = [
+        'Yes',
+        'No',
+        
+    ];
+    $vendors = [
+        'Yes',
+        'No',
+        
+    ];
 
     $countrys = Country::select('id', 'country_name')->get();
-    $stores = Stores::select('id', 'name')->get();
     $banks = Banks::select('id', 'name')->get();
 
     return view('pages.Vendor.create', compact(
-        'vendorgroup', 'types', 'countrys', 'stores', 'banks', 'hashedId'
+        'vendorgroup', 'types','vendors','consis', 'countrys', 'banks', 'hashedId'
     ));
 }
 
@@ -97,109 +93,6 @@ public function logs(Request $request)
         'hashedId' => $hashedId,
     ]);
 }
-// public function store(Request $request)
-// {
-        
-//     $validated = $request->validate([
-//         'vendor_group_id' => ['nullable', 'exists:vendorgroups,id', new NoXSSInput()],
-//         // 'bank_id' => ['nullable', 'exists:banks_tables,id', new NoXSSInput()],
-//         // 'country_id' => ['nullable', 'exists:country,id', new NoXSSInput()],
-//         // 'store_id' => ['required', 'exists:stores_tables,id', new NoXSSInput()],
-//     //      'type' => [
-//     //     'required', 'exists:vendor,type',
-//     //     new NoXSSInput(),
-//     // ],
-//       'type' => [
-//         'required',
-//         'in:Regular Vendor,Consignment,Consignment Open Price,General Allocation',
-//         new NoXSSInput(),
-//     ],
-//     //  'code' => ['nullable', new NoXSSInput()],
-//        'name' => [
-//                 'required',
-//                 'string',
-//                 'max:255',
-//                 new NoXSSInput(),
-//                 function ($attribute, $value, $fail) {
-//                     $normalized = strtolower(trim(preg_replace('/\s+/', ' ', $value))); // hilangkan spasi ganda
-        
-//                     $exists = Vendor::all()
-//                         ->map(function ($item) {
-//                             return strtolower(trim(preg_replace('/\s+/', ' ', $item->name)));
-//                         })
-//                         ->contains($normalized);
-
-//                     if ($exists) {
-//                         $fail('The ' . $attribute . ' is too similar to an existing name.');
-//                     }
-//                 }
-//             ],
-//     //         'address' => ['required','string','max:255', new NoXSSInput()],
-//     //         'city' => [
-//     //             'required',
-//     //             'string',
-//     //             'max:255',
-//     //             new NoXSSInput()
-//     //         ],
-//     //         'email' => ['required', 'string', 'max:255',],
-//     //         'phonenumber' => ['required', 'numeric', 'digits_between:10,13',new NoXSSInput()],
-//     //  'vendorpkp' => [
-//     //     'required',
-//     //     Rule::in($pkps),
-//     //     new NoXSSInput(),
-//     // ],
-//     //  'consignment' => [
-//     //     'required',
-//     //     Rule::in($consignments),
-//     //     new NoXSSInput(),
-//     // ],
-//     //         'salesname' => ['nullable','string','max:255', new NoXSSInput()],
-//     //         'salescp' => ['nullable','string','numeric', 'digits_between:10,13', new NoXSSInput()],
-//     //         'npwpname' => ['nullable','string','max:255', new NoXSSInput()],
-//     //         'npwpaddress' => ['nullable','string','max:255', new NoXSSInput()],
-//     //         'npwpnumber' => ['nullable','string','max:255', new NoXSSInput()],
-//     //         'description' => ['nullable','string','max:255', new NoXSSInput()],
-//     ]);
-//     try {
-//         DB::beginTransaction();
-
-//         $vendor = Vendor::create([
-//             'vendor_group_id' => ($validated['vendor_group_id']),
-//             // 'country_id' => ($validated['country_id']),
-//             // 'bank_id' => ($validated['bank_id']),
-//             // // 'store_id' => ($validated['store_id']),
-//             'name' => ($validated['name']),
-//             'type' => ($validated['type']),
-//             // 'code' => ($validated['code']),
-//             // 'name' => strtoupper($validated['name']),
-//             // 'address' => ($validated['address']),
-//             // 'city' => ($validated['city']),
-//             // 'email' => ($validated['email']),
-//             // 'phonenumber' => ($validated['phonenumber']),
-//             // 'consignment' => ($validated['consignment']),
-//             // 'vendorpkp' => ($validated['vendorpkp']),
-//             // 'salesname' => ($validated['salesname']),
-//             // 'salescp' => ($validated['salescp']),
-//             // 'npwpaddress' => ($validated['npwpaddress']),
-//             // 'npwpnumber' => strtoupper($validated['npwpnumber']),
-//             // 'description' => strtoupper($validated['description']),
-//         ]);
-//         DB::commit();
-//         // Ambil kembali vendorgroup berdasarkan ID
-//         $vendorgroup = Vendorgroup::findOrFail($validated['vendor_group_id']);
-
-//         // Hitung hashedId-nya
-//         $hashedId = substr(hash('sha256', $vendorgroup->id . env('APP_KEY')), 0, 8);
-
-//         // Redirect ke halaman detail
-//         return redirect()->route('Vendorgroup.detail', $hashedId)
-//                          ->with('success', "Vendor Created Successfully.");
-//     } catch (\Exception $e) {
-//         DB::rollBack();
-//         return back()->withErrors(['error' => 'failed to save data: ' . $e->getMessage()])
-//                      ->withInput();
-//     }
-// }
 
 public function store(Request $request)
 {
@@ -210,9 +103,13 @@ public function store(Request $request)
         'General Allocation',
     ];
 
+    $consis = ['Yes', 'No'];
+    $vendors = ['Yes', 'No'];
+
     $validated = $request->validate([
         'vendor_group_id' => ['required', 'exists:vendorgroups,id', new NoXSSInput()],
         'type' => ['required', Rule::in($types), new NoXSSInput()],
+        'consignment' => ['required', Rule::in($consis), new NoXSSInput()],
         'name' => [
             'required', 'string', 'max:255', new NoXSSInput(),
             function ($attribute, $value, $fail) {
@@ -226,15 +123,50 @@ public function store(Request $request)
                 }
             }
         ],
+        'code' => ['nullable','unique:vendor,code', new NoXSSInput()],
+        'address' => ['required','string','max:255', new NoXSSInput()],
+        'city' => ['required','string','max:255', new NoXSSInput()],
+        'email' => ['required','string','max:255', new NoXSSInput()],
+        'phonenumber' => ['required','string','max:255', new NoXSSInput()],
+               'vendorpkp' => ['required', Rule::in($vendors), new NoXSSInput()],
+               'salesname' => ['required', 'string','max:255', new NoXSSInput()],
+               'salescp' => ['required', 'string','max:255', new NoXSSInput()],
+               'npwpname' => ['nullable','string','max:255', new NoXSSInput()],
+               'npwpnumber' => ['nullable', 'string','max:255', new NoXSSInput()],
+               'npwpaddress' => ['nullable', 'string','max:255', new NoXSSInput()],
+               'description' => ['nullable',  'string','max:255', new NoXSSInput()],
+               'country_id' => ['required', 'exists:country,id','max:255', new NoXSSInput()],
+               'bank_id' => ['required', 'exists:banks_tables,id','max:255', new NoXSSInput()],
+
     ]);
 
     try {
         DB::beginTransaction();
+        $generatedCode = Vendor::generateCode($validated['vendor_group_id'], $validated['consignment']);
+
 
         $vendor = Vendor::create([
             'vendor_group_id' => $validated['vendor_group_id'],
-            'name' => $validated['name'],
+            // 'name' => $validated['name'],
+                'name' => strtoupper($validated['name']),
+
             'type' => $validated['type'],
+            'consignment' => $validated['consignment'],
+            'code' => $generatedCode,
+            'country_id' => $validated['country_id'],
+            'address' => $validated['address'],
+            'city' => $validated['city'],
+            'email' => $validated['email'],
+            'phonenumber' => $validated['phonenumber'],
+            'vendorpkp' => $validated['vendorpkp'],
+            'salesname' => $validated['salesname'],
+            'salescp' => $validated['salescp'],
+            'npwpname' => $validated['npwpname'],
+            'npwpaddress' => $validated['npwpaddress'],
+            'npwpnumber' => $validated['npwpnumber'],
+            'description'    => $validated['description'],
+            'bank_id' => $validated['bank_id'],
+
         ]);
 
         DB::commit();
@@ -254,24 +186,89 @@ public function store(Request $request)
 
 
 
-    public function getVendors($hashedId)
+
+public function getVendors($hashedId)
 {
-    $vendorgroup = Vendorgroup::get()->first(function ($u) use ($hashedId) {
+    $vendorgroup = Vendorgroup::all()->first(function ($u) use ($hashedId) {
         return substr(hash('sha256', $u->id . env('APP_KEY')), 0, 8) === $hashedId;
     });
 
     if (!$vendorgroup) {
         abort(404, 'Vendor group not found.');
     }
+    $type = request('type');
+    $consignment = request('consignment');
+    $vendorpkp = request('vendorpkp');
+   $bankName = request('name');
+    
+    $vendors = $vendorgroup->vendors()->with('banks')
+        ->when($type, fn($query) => $query->where('type', $type))
+        ->when($consignment, fn($query) => $query->where('consignment', $consignment))
+        ->when($vendorpkp, fn($query) => $query->where('vendorpkp', $vendorpkp))
+          ->when($bankName, fn($query) =>
+        $query->whereHas('banks', function ($q) use ($bankName) {
+            $q->where('name', 'like', '%' . $bankName . '%');
+        })
+    )
+        ->with(['banks', 'country', 'group'])
+        ->select([
+            'id', 'type', 'code', 'address', 'name', 'city', 'country_id', 'email',
+            'phonenumber', 'consignment', 'vendorpkp', 'salesname', 'salescp',
+            'npwpname', 'npwpnumber', 'npwpaddress', 'bank_id', 'description'
+        ]);
 
-   $vendors = $vendorgroup->vendors()->with('banks','country','group')->select(['id', 'type','code','address','name','city','country_id','email','phonenumber','consignment','vendorpkp','salesname','salescp','npwpname','npwpnumber','npwpaddress','bank_id','description']); // pilih kolom eksplisit
     return DataTables::of($vendors)
-  ->addColumn('action', function ($row) {
-    return '<a href="' . route('Vendor.edit', $row->id_hashed) . '" class="btn btn-sm btn-primary">Edit</a>';
-})
+        ->addColumn('action', function ($row) {
+            return '<a href="' . route('Vendor.edit', $row->id_hashed) . '" class="btn btn-sm btn-primary">Edit</a>';
+        })
         ->rawColumns(['action'])
         ->make(true);
-}    
+}
+
+public function getVendorFilters($hashedId)
+{
+    $vendorgroup = Vendorgroup::all()->first(function ($u) use ($hashedId) {
+        return substr(hash('sha256', $u->id . env('APP_KEY')), 0, 8) === $hashedId;
+    });
+
+    if (!$vendorgroup) {
+        return response()->json(['error' => 'Vendor group not found.'], 404);
+    }
+
+    $types = $vendorgroup->vendors()
+        ->select('type')
+        ->distinct()
+        ->whereNotNull('type')
+        ->pluck('type')
+        ->values();
+    $consignments = $vendorgroup->vendors()
+        ->select('consignment')
+        ->distinct()
+        ->whereNotNull('consignment')
+        ->pluck('consignment')
+        ->values();
+    $vendorpkps = $vendorgroup->vendors()
+        ->select('vendorpkp')
+        ->distinct()
+        ->whereNotNull('vendorpkp')
+        ->pluck('vendorpkp')
+        ->values();
+        $banks = Banks::select('name')->distinct()->orderBy('name')->pluck('name');
+
+
+
+    return response()->json([
+        'types' => $types,
+        'consignments' => $consignments,
+        'vendorpkps' => $vendorpkps,
+        'banks' => $banks,
+    ]);
+}
+
+
+
+
+
  public function edit($hashedId)
     {
         $vendor = Vendor::with('banks')->get()->first(function ($u) use ($hashedId) {

@@ -239,6 +239,7 @@
     <script>
         // Wait for jQuery to be fully loaded
         jQuery(document).ready(function($) {
+            
             // Initialize DataTable with proper configuration
             var table = $('#users-table').DataTable({
                 processing: true,
