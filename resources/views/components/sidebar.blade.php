@@ -135,12 +135,12 @@
                 </li>
             @endrole
 
-            @role('HeadBuyer')
+            @role('HeadBuyer|Buyer')
 
             <li class="menu-header">Buyer Contoh</li>
             <li class="nav-item dropdown ">
                 <a href="#" class="nav-link has-dropdown" data-toggle="dropdown"><i class="fas fa-columns"></i>
-                    <span>buyer lagi</span></a>
+                    <span>Data Master</span></a>
                 <ul class="dropdown-menu">
                     <li class="{{ Request::is('Uoms') ? 'active' : '' }}">
                         <a class="nav-link" href="{{ url('Uoms') }}">Uoms</a>
@@ -156,6 +156,15 @@
                     </li>
                     <li class="{{ Request::is('Statusproduct') ? 'active' : '' }}">
                         <a class="nav-link" href="{{ url('Statusproduct') }}">Status Product</a>
+                    </li>
+                </ul>
+            </li>
+            <li class="nav-item dropdown ">
+                <a href="#" class="nav-link has-dropdown" data-toggle="dropdown"><i class="fas fa-columns"></i>
+                    <span>Vendor Group</span></a>
+                <ul class="dropdown-menu">
+                    <li class="{{ Request::is('Vendorgroup') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ url('Vendorgroup') }}">Vendor Group</a>
                     </li>
                 </ul>
             </li>

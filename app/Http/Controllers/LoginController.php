@@ -296,14 +296,14 @@ class LoginController extends Controller
         $rateLimiterKey = "/:{$request->ip()}:{$normalizedUsername}";
         if (RateLimiter::tooManyAttempts($rateLimiterKey, 5)) {
             Log::warning("Rate limiter triggered for username: {$normalizedUsername}");
-            return back()->withErrors(['/' => 'Terlalu banyak percobaan login. Silakan coba lagi nanti.']);
+            return back()->withErrors(['/' => 'Too many request login. Try again later.']);
         }
         try {
             $attributes['username'] = $normalizedUsername;
             if (!Auth::attempt($attributes, $request->boolean('remember'))) {
                 Log::warning("Failed login attempt for username: {$normalizedUsername}");
                 RateLimiter::hit($rateLimiterKey, 60);
-                return back()->withErrors(['/' => 'Username atau Password salah.']);
+                return back()->withErrors(['/' => 'Wrong username or password.']);
             }
 
             $request->session()->regenerate();
@@ -349,15 +349,15 @@ class LoginController extends Controller
             // Daftar role yang boleh bypass MAC check menggunakan Spatie
             $privilegedRoles = [
                 'Admin',
-                'head-warehouse',
+                'HeadWarehouse',
                 'HeadHR',
                 'HR',
-                'head-buyer',
-                'head-finance',
-                'gm',
+                'HeadBuyer',
+                'HeadFinance',
+                'GM',
                 'finance',
-                'buyer',
-                'warehouse'
+                'Buyer',
+                'EDP'
             ];
 
             // Role yang harus selalu cek MAC (termasuk Manager Store)
@@ -377,7 +377,7 @@ class LoginController extends Controller
                 if (empty($macAddresses)) {
                     Log::warning("No MAC addresses detected for IP: {$request->ip()}");
                     Auth::logout();
-                    return back()->withErrors(['/' => 'Gagal mendapatkan identitas perangkat. Silakan hubungi administrator.'])->withInput();
+                    return back()->withErrors(['/' => 'Failed to get device id. please contact edw.'])->withInput();
                 }
 
                 Log::info("Detected MAC addresses: " . implode(', ', $macAddresses));
@@ -396,7 +396,7 @@ class LoginController extends Controller
                 if (!$permission) {
                     Log::warning("Unauthorized device attempt from IP: {$request->ip()}");
                     Auth::logout();
-                    return back()->withErrors(['/' => 'Perangkat ini tidak diizinkan untuk login.'])->withInput();
+                    return back()->withErrors(['/' => 'this device is not allowed to use this sytem, please contact edw.'])->withInput();
                 }
 
                 Log::info("User {$normalizedUsername} passed MAC address verification");
@@ -416,7 +416,8 @@ class LoginController extends Controller
                 'HeadHR' => 'pages.dashboardHR',
                 'HR' => 'pages.dashboardHR',
                 'head-warehouse' => 'pages.dashboarHeadWarehouse',
-                'head-buyer' => 'pages.dashboardHeadBuyer',
+                'HeadBuyer' => 'pages.dashboardHeadBuyer',
+                'Buyer' => 'pages.dashboardBuyer',
                 'cashier-store' => 'pages.dashboardKasir',
                 'supervisor-store' => 'pages.dashboardSupervisor',
                 'ManagerStore' => 'pages.dashboardManager'
@@ -426,7 +427,7 @@ class LoginController extends Controller
                 if ($user->hasRole($role)) {
                     Log::info("User {$normalizedUsername} logged in with role: {$role}");
                     \Log::debug('User permissions: ' . auth()->user()->getPermissionsViaRoles()->pluck('name'));
-                    return redirect()->route($route)->with('success', 'Success login, Goodluck!!!');
+                    return redirect()->route($route)->with('success', 'Login Success , Goodluck!!!');
                 }
             }
 
@@ -434,11 +435,11 @@ class LoginController extends Controller
             // Fallback untuk role tidak dikenal
             Log::warning("User {$normalizedUsername} has no valid role assigned");
             Auth::logout();
-            return redirect('/')->with('warning', 'Akun Anda tidak memiliki peran yang valid.');
+            return redirect('/')->with('warning', 'Your Account is not allowed to use this system.');
 
         } catch (\Exception $e) {
             Log::error("Login error: " . $e->getMessage());
-            return back()->withErrors(['/' => 'Terjadi kesalahan. Silakan coba lagi.']);
+            return back()->withErrors(['/' => 'Bad Request. Try again later.']);
         }
     }
 

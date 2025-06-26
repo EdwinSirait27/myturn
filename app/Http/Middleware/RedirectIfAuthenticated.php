@@ -41,15 +41,15 @@ class RedirectIfAuthenticated
             return redirect('/dashboardSupervisor');
         }
         if ($user->can('isHeadBuyer')) {
-            return redirect('/dashboardBuyer');
+            return redirect('/dashboardHeadBuyer');
         }
         if ($user->can('isBuyer')) {
-            return redirect('/dashboard');
+            return redirect('/dashboardBuyer');
         }
 
         // Jika user_type tidak valid, logout dan kembali ke login
         Auth::logout();
-        return redirect('/')->withErrors(['error' => 'Akses ditolak.']);
+        return redirect('/')->withErrors(['error' => 'Access Denied, please contact Edw for more information.']);
     }
 
     return $next($request);

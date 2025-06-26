@@ -65,9 +65,32 @@
             <div class="section-header-breadcrumb">
                 <div class="breadcrumb-item active"><a href="#">Dashboard</a></div>
                 <div class="breadcrumb-item">HR Manager</div>
+                <div id="realtime-clock" class="text-muted small ml-4"></div>
             </div>
         </div>
+<script>
+    function updateClock() {
+        const now = new Date();
+        // Format waktu AM/PM
+        let hours = now.getHours();
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        const seconds = now.getSeconds().toString().padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12 || 12; // konversi ke 12 jam
+        const timeString = `${hours.toString().padStart(2, '0')}:${minutes}:${seconds} ${ampm}`;
 
+        // Format tanggal dd-mm-yyyy
+        const day = now.getDate().toString().padStart(2, '0');
+        const month = (now.getMonth() + 1).toString().padStart(2, '0');
+        const year = now.getFullYear();
+        const dateString = `${day}-${month}-${year}`;
+
+        document.getElementById('realtime-clock').textContent = `${dateString} ${timeString}`;
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock();
+</script>
         <div class="section-body">
             <!-- Overview Cards -->
             <div class="row">
