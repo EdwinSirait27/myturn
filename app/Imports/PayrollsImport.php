@@ -19,57 +19,7 @@ class PayrollsImport implements ToModel
         $this->errors = &$errors;
     }
     public function model(array $row)
-    // {
-    //     $createdat = null;
-    //     if (!empty($row[16])) {
-    //         if (is_numeric($row[16])) {
-    //             $createdat = Date::excelToDateTimeObject($row[16])->format('Y-m-d H:i:s');
-    //         } else {
-    //             $createdat = Carbon::parse($row[16])->format('Y-m-d H:i:s');
-    //         }
-    //     }
-    //     $monthyear = null;
-    //     if (!empty($row[15])) {
-    //         if (is_numeric($row[15])) {
-    //             $monthyear = Date::excelToDateTimeObject($row[15])->format('Y-m-d');
-    //         } else {
-    //             $monthyear = Carbon::parse($row[15])->format('Y-m-d');
-    //         }
-    //     }
-    //     // Cek unik employee_id
-    //     if ($row[0] !== null && !Payrolls::where('employee_id', $row[0])->exists()) {
-    //         return new Payrolls([
-    //             'employee_id' => $row[0],
-    //             'attendance' => $row[1] ?? null,
-    //             'daily_allowance' => isset($row[2]) ? ($row[2]) : null,
-    //             'house_allowance' => isset($row[3]) ? ($row[3]) : null,
-    //             'meal_allowance' => isset($row[4]) ? ($row[4]) : null,
-    //             'transport_allowance' => isset($row[5]) ? ($row[5]) : null,
-    //             'bonus' => isset($row[6]) ? ($row[6]) : null,
-    //             'overtime' => isset($row[7]) ? ($row[7]) : null,
-    //             'late_fine' => isset($row[8]) ? ($row[8]) : null,
-    //             'punishment' => isset($row[9]) ? ($row[9]) : null,
-    //             'bpjs_kes' => isset($row[10]) ? ($row[10]) : null,
-    //             'bpjs_ket' => isset($row[11]) ? ($row[11]) : null,
-    //             'tax' => isset($row[12]) ? ($row[12]) : null,
-
-    //             'deductions' =>
-    //                 (isset($row[8]) ? $row[8] : 0) +
-    //                 (isset($row[9]) ? $row[9] : 0) +
-    //                 (isset($row[10]) ? $row[10] : 0) +
-    //                 (isset($row[11]) ? $row[11] : 0) +
-    //                 (isset($row[12]) ? $row[12] : 0),
-    //             'salary' => isset($row[14]) ? ($row[14]) : null,
-    //             'month_year' => $monthyear ?? null,
-    //             'created_at' => $createdat ?? null,
-    //             'period' => $row[17] ?? null,
-
-    //         ]);
-    //     }
-
-    //     // Jika employee_id sudah ada, skip baris tersebut
-    //     return null;
-    // }
+    
     {
     $createdat = null;
     if (!empty($row[18])) {

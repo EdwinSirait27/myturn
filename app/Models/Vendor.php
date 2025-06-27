@@ -20,8 +20,8 @@ class Vendor extends Model
         'email',
         'phonenumber',
         'consignment',
-        
         'vendorpkp',
+        'vendorfee',
         'salesname',
         'salescp',
         'npwpname',
@@ -118,6 +118,7 @@ public static function generateCode($vendorGroupId, $consignment)
             'salesname',
             'salescp',
             'npwpname',
+            'vendorfee',
             'npwpnumber',
             'npwpaddress',
             'bank_id',

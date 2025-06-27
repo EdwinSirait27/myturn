@@ -193,8 +193,17 @@
                                     </table>
                                 </div>
                                 <div class="action-buttons">
-                                    <button type="button" onclick="window.location='{{ route('Vendorgroup.create') }}'"
-                                        class="btn btn-primary btn-sm">
+                                  
+                                    <button type="button" onclick="window.location='{{ route('pages.Importvendorgroup') }}'"
+                                    class="btn btn-success btn-sm ml-2">
+                                    <i class="fas fa-male"></i> Import Vendor Group
+                                </button>
+                                <button type="button" onclick="window.location='{{ route('pages.Importvendor') }}'"
+                                    class="btn btn-dark btn-sm ml-2">
+                                    <i class="fas fa-female"></i> Import Vendor 
+                                </button>
+                                  <button type="button" onclick="window.location='{{ route('Vendorgroup.create') }}'"
+                                        class="btn btn-primary btn-sm ml-2">
                                         <i class="fas fa-plus-circle"></i> Create Vendor Group
                                     </button>
 

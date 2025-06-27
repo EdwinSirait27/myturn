@@ -9,7 +9,8 @@ use App\Rules\NoXSSInput;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\Models\Activity;
-
+use App\Imports\Vendorgroupimport;
+use Maatwebsite\Excel\Facades\Excel;
 class VendorgroupController extends Controller
 {
     public function logs(Request $request)
@@ -196,6 +197,20 @@ class VendorgroupController extends Controller
             return back()->withErrors(['error' => 'failed to save data: ' . $e->getMessage()])
                 ->withInput();
         }
+        
     }
+     public function indeximportvendorgroup() 
+    {
+        return view('pages.Importvendorgroup.Importvendorgroup');
+    }
+ public function importvendorgroup(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,csv,xls'
+        ]);
 
+        Excel::import(new Vendorgroupimport, $request->file('file'));
+
+        return back()->with('success', 'Import vendor group success!');
+    }
 }

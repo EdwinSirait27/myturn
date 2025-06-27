@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 use App\Models\Banks;
-use App\Models\Stores;
 use App\Models\Vendor;
 use App\Models\Country;
 use App\Models\Vendorgroup;
@@ -12,6 +11,8 @@ use App\Rules\NoXSSInput;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\Models\Activity;
+use App\Imports\Vendorimport;
+use Maatwebsite\Excel\Facades\Excel;
 
 
 class VendorController extends Controller
@@ -54,7 +55,6 @@ public function create($hashedId)
 
 public function logs(Request $request)
 {
-    // dd(Activity::where('log_name', 'vendorgroup')->latest()->first());
     if ($request->ajax()) {
         $data = Activity::where('log_name', 'vendor')
             ->with('causer')
@@ -74,6 +74,24 @@ public function logs(Request $request)
                 }
                 return '-';
             })
+            ->addColumn('detail', function ($row) {
+    if ($row->properties->has('attributes')) {
+        return collect($row->properties['attributes'])->map(function ($val, $key) {
+            if ($key === 'country_id') {
+                // ambil nama country dari ID
+                $countryName = Country::find($val)?->country_name ?? $val;
+                return "<div><strong>Country:</strong> $countryName</div>";
+            }
+            if ($key === 'bank_id') {
+                // ambil nama country dari ID
+                $bankName = Banks::find($val)?->name ?? $val;
+                return "<div><strong>Banks:</strong> $bankName</div>";
+            }
+            return "<div><strong>" . ucfirst(str_replace('_', ' ', $key)) . ":</strong> $val</div>";
+        })->implode('');
+    }
+    return '-';
+})
             ->rawColumns(['detail']) // supaya detail HTML tidak di-escape
             ->make(true);
     }
@@ -93,7 +111,20 @@ public function logs(Request $request)
         'hashedId' => $hashedId,
     ]);
 }
+ public function indeximportvendor() 
+    {
+        return view('pages.Importvendor.Importvendor');
+    }
+ public function importvendor(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,csv,xls'
+        ]);
 
+        Excel::import(new Vendorimport, $request->file('file'));
+
+        return back()->with('success', 'import vendor success!');
+    }
 public function store(Request $request)
 {
     $types = [
@@ -135,6 +166,7 @@ public function store(Request $request)
                'npwpnumber' => ['nullable', 'string','max:255', new NoXSSInput()],
                'npwpaddress' => ['nullable', 'string','max:255', new NoXSSInput()],
                'description' => ['nullable',  'string','max:255', new NoXSSInput()],
+               'vendorfee' => ['nullable', new NoXSSInput()],
                'country_id' => ['required', 'exists:country,id','max:255', new NoXSSInput()],
                'bank_id' => ['required', 'exists:banks_tables,id','max:255', new NoXSSInput()],
 
@@ -166,6 +198,7 @@ public function store(Request $request)
             'npwpnumber' => $validated['npwpnumber'],
             'description'    => $validated['description'],
             'bank_id' => $validated['bank_id'],
+            'vendorfee'       => $validated['vendorfee'] ?? 0.015,
 
         ]);
 
@@ -214,7 +247,7 @@ public function getVendors($hashedId)
         ->select([
             'id', 'type', 'code', 'address', 'name', 'city', 'country_id', 'email',
             'phonenumber', 'consignment', 'vendorpkp', 'salesname', 'salescp',
-            'npwpname', 'npwpnumber', 'npwpaddress', 'bank_id', 'description'
+            'npwpname', 'npwpnumber', 'npwpaddress', 'bank_id','vendorfee', 'description'
         ]);
 
     return DataTables::of($vendors)
