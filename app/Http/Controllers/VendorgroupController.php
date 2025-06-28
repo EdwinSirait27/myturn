@@ -10,7 +10,12 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\Models\Activity;
 use App\Imports\Vendorgroupimport;
+use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Concerns\SkipsFailures;
+
 use Maatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\Concerns\SkipsOnFailure;
+
 class VendorgroupController extends Controller
 {
     public function logs(Request $request)
@@ -41,8 +46,10 @@ class VendorgroupController extends Controller
 }
     public function index()
     {
+         
         return view('pages.Vendorgroup.Vendorgroup');
     }
+  
     public function create()
     {
         return view('pages.Vendorgroup.create');
@@ -201,16 +208,66 @@ class VendorgroupController extends Controller
     }
      public function indeximportvendorgroup() 
     {
-        return view('pages.Importvendorgroup.Importvendorgroup');
+         $files = Storage::disk('public')->files('template vendor group');
+        return view('pages.Importvendorgroup.Importvendorgroup',compact('files'));
     }
- public function importvendorgroup(Request $request)
-    {
-        $request->validate([
-            'file' => 'required|mimes:xlsx,csv,xls'
-        ]);
+      public function downloadvendorgroup($filename)
+{
+    $path = 'template vendor group/' . $filename;
 
-        Excel::import(new Vendorgroupimport, $request->file('file'));
-
-        return back()->with('success', 'Import vendor group success!');
+    if (Storage::disk('public')->exists($path)) {
+        return Storage::disk('public')->download($path);
     }
+
+    abort(404);
+}
+//  public function importvendorgroup(Request $request)
+//     {
+//         $request->validate([
+//             'file' => 'required|mimes:xlsx,csv,xls'
+//         ]);
+
+//         Excel::import(new Vendorgroupimport, $request->file('file'));
+
+//         return back()->with('success', 'Import vendor group success!');
+//     }
+
+    public function importvendorgroup(Request $request)
+{
+    // // Validasi bahwa file ada dan berformat Excel
+    // $request->validate([
+    //     'file' => 'required|mimes:xlsx,csv,xls'
+    // ]);
+
+    // try {
+    //     // Jalankan proses import (bisa throw ValidationException dari model())
+    //     Excel::import(new VendorgroupImport, $request->file('file'));
+
+    //     // Jika sukses
+    //     return back()->with('success', 'Import success');
+
+    // } catch (\Illuminate\Validation\ValidationException $e) {
+    //     // Jika ada kesalahan validasi (dari model()), tampilkan ke view
+    //     return back()->withErrors($e->errors());
+
+    // } catch (\Exception $e) {
+    //     // Tangani error umum lainnya (misalnya format Excel rusak)
+    //     return back()->withErrors(['error' => $e->getMessage()]);
+    // }
+    $request->validate([
+        'file' => 'required|mimes:xlsx,csv,xls'
+    ]);
+
+    $import = new VendorgroupImport();
+
+    Excel::import($import, $request->file('file'));
+
+    // Jika ada kesalahan validasi
+    if ($import->failures()->isNotEmpty()) {
+        return back()->withFailures($import->failures());
+    }
+
+    return back()->with('success', 'Import success');
+}
+
 }

@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Spatie\Activitylog\Models\Activity;
 use App\Imports\Vendorimport;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Storage;
 
 
 class VendorController extends Controller
@@ -113,8 +114,20 @@ public function logs(Request $request)
 }
  public function indeximportvendor() 
     {
-        return view('pages.Importvendor.Importvendor');
+         $files = Storage::disk('public')->files('template');
+
+        return view('pages.Importvendor.Importvendor',compact('files'));
     }
+      public function downloadvendor($filename)
+{
+    $path = 'template/' . $filename;
+
+    if (Storage::disk('public')->exists($path)) {
+        return Storage::disk('public')->download($path);
+    }
+
+    abort(404);
+}
  public function importvendor(Request $request)
     {
         $request->validate([

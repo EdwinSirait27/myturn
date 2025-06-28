@@ -436,8 +436,8 @@
                         defaultContent: '-'
                     },
                     {
-                        data: 'country_id',
-                        name: 'country_id',
+                        data: 'country.country_name',
+                        name: 'country.country_name',
                         className: 'text-center',
                         defaultContent: '-'
                     },

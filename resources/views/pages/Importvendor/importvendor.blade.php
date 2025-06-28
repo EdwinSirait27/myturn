@@ -122,7 +122,7 @@
             </div>
             <div class="form-actions"
                             style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
-                            <a href="{{ route('pages.Vendor') }}" class="btn btn-secondary">
+                            <a href="{{ route('pages.Vendorgroup') }}" class="btn btn-secondary">
                                 <i class="fas fa-times"></i> {{ __('Cancel') }}
                             </a>
                             <button id="create-btn" type="submit" class="btn btn-primary">
@@ -133,10 +133,24 @@
     </div>
 </div>
         </section>
+         <h4>List Template</h4>
+<ul>
+    @forelse($files as $file)
+        <li>
+            {{ basename($file) }} -
+            <a href="{{ route('Vendor.downloadvendor', ['filename' => basename($file)]) }}">
+                Download
+            </a>
+        </li>
+    @empty
+        <li>There's no template here boy.</li>
+    @endforelse
+</ul>
         <div class="alert alert-secondary mt-4" role="alert">
             <span class="text-dark">
                 <strong>Important Note:</strong> <br>
                 - for the file use excel xlsx type, csv may not work.<br>
+                - for code and created_at just leave the value blank.<br>
             </span>
         </div>
     </div>

@@ -95,7 +95,7 @@
             <div class="section-header">
                 <h1>Import Vendor Group</h1>
             </div>
-            @if ($errors->any())
+            {{-- @if ($errors->any())
                 <div class="alert alert-danger">
                     <ul>
                         @foreach ($errors->all() as $error)
@@ -103,7 +103,23 @@
                         @endforeach
                     </ul>
                 </div>
-            @endif
+            @endif --}}
+        @if(session('failures'))
+    <div class="alert alert-danger">
+        <strong>Error At Line:</strong>
+        <ul>
+            @foreach(session('failures') as $failure)
+                <li>
+                    Line {{ $failure->row() }} - 
+                    Colom: {{ $failure->attribute() }} - 
+                    Message: {{ implode(', ', $failure->errors()) }}
+                </li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
+
             {{-- <div class="section-body">
                 <form id="import-vendor" action="{{ route('Importvendorgroup.vendorgroup') }}" method="POST"
                     enctype="multipart/form-data">
@@ -142,10 +158,26 @@
                 </div>
             </div>
         </section>
+        <h4>List Template</h4>
+<ul>
+    @forelse($files as $file)
+        <li>
+            {{ basename($file) }} -
+            <a href="{{ route('Vendorgroup.downloadvendorgroup', ['filename' => basename($file)]) }}">
+                Download
+            </a>
+        </li>
+    @empty
+        <li>There's no template here boy.</li>
+    @endforelse
+</ul>
+
         <div class="alert alert-secondary mt-4" role="alert">
             <span class="text-dark">
                 <strong>Important Note:</strong> <br>
                 - for the file use excel xlsx type, csv may not work.<br>
+                - for code and created_at just leave the value blank.<br>
+
             </span>
         </div>
     </div>

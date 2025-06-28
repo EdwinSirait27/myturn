@@ -220,6 +220,7 @@ Route::middleware(['auth', 'role:Admin|HeadHR|HR|Buyer|HeadBuyer'])->group(funct
 Route::get('/Importvendorgroup', [VendorgroupController::class, 'indeximportvendorgroup'])
             ->name('pages.Importvendorgroup');
         Route::post('/Importvendorgroup', [VendorgroupController::class, 'importvendorgroup'])->name('Importvendorgroup.vendorgroup');
+        Route::get('/Vendorgroup/downloadvendorgroup/{filename}', [VendorGroupController::class, 'downloadvendorgroup'])->name('Vendorgroup.downloadvendorgroup');
     });
     Route::group(['middleware' => ['permission:ManageVendor']], function () {
 
@@ -235,6 +236,7 @@ Route::get('/Importvendorgroup', [VendorgroupController::class, 'indeximportvend
 Route::get('/Importvendor', [VendorController::class, 'indeximportvendor'])
             ->name('pages.Importvendor');
         Route::post('/Importvendor', [VendorController::class, 'importvendor'])->name('Importvendor.vendor');
+        Route::get('/Vendor/downloadvendor/{filename}', [VendorController::class, 'downloadvendor'])->name('Vendor.downloadvendor');
 
         // Route::get('/Vendorgroup/detail/{hashedId}', [VendorController::class, 'detail'])->name('Vendorgroup.detail');
         // Route::put('/Vendorgroup/{hashedId}', [VendorgroupController::class, 'update'])->name('Vendorgroup.update');

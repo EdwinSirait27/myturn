@@ -222,6 +222,7 @@
                                     <span class="text-dark">
                                         <strong>Important Note:</strong> <br>
                                         - If Vendor group already exist, you cant input the same vendor group again, for exm: PT. Dancow already registered then you can't input the same data okay.<br>
+                                        - Import vendor group first and then import vendor.<br>
                                         <br>
 
                                     </span>

@@ -12,7 +12,19 @@ use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
-class Vendorimport implements ToModel, WithHeadingRow, WithChunkReading
+
+
+
+
+
+
+
+use Illuminate\Validation\ValidationException;
+use Maatwebsite\Excel\Concerns\SkipsOnFailure;
+use Maatwebsite\Excel\Concerns\SkipsFailures;
+use Maatwebsite\Excel\Concerns\WithValidation;
+use Maatwebsite\Excel\Validators\Failure;
+class Vendorimport implements ToModel, WithHeadingRow, WithChunkReading,WithValidation, SkipsOnFailure
 {
     /**
      * Handle each row from the Excel file
@@ -20,7 +32,9 @@ class Vendorimport implements ToModel, WithHeadingRow, WithChunkReading
      * @param array $row
      * @return \Illuminate\Database\Eloquent\Model|null
      */
-    public function model(array $row)
+
+   use SkipsFailures;
+     public function model(array $row)
     {
         $vendorgroupId = trim($row['vendor_group_id'] ?? '');
         if (empty($vendorgroupId) || !Vendorgroup::where('id', $vendorgroupId)->exists()) {
@@ -51,19 +65,30 @@ class Vendorimport implements ToModel, WithHeadingRow, WithChunkReading
             }
         }
 
+        $name = strtoupper(trim($row['name'] ?? ''));
+        if (empty($name)) {
+            Log::warning("Skipped vendor: name kosong");
+            return null;
+        }
+
+        $code = $row['code'] ?? $this->generateCode($vendorgroupId, $row['consignment'] ?? 'No');
+
         return new Vendor([
             'vendor_group_id' => $vendorgroupId,
             'bank_id' => $bankId,
             'country_id' => $countryId,
             'type' => $row['type'] ?? null,
-            'code' => $row['code'] ?? null,
-            'name' => $row['name'] ?? null,
+            'code' => $code,
+            'name' => $name,
             'address' => $row['address'] ?? null,
             'city' => $row['city'] ?? null,
             'email' => $row['email'] ?? null,
             'phonenumber' => $row['phonenumber'] ?? null,
+            // 'consignment' => $row['consignment'] ?? null,
+            // 'vendorfee' => $row['vendorfee'] ?? null,
             'consignment' => $row['consignment'] ?? null,
-            'vendorfee' => $row['vendorfee'] ?? null,
+'vendorfee' => $row['vendorfee'] ?? null,
+
             'vendorpkp' => $row['vendorpkp'] ?? null,
             'salesname' => $row['salesname'] ?? null,
             'salescp' => $row['salescp'] ?? null,
@@ -75,11 +100,76 @@ class Vendorimport implements ToModel, WithHeadingRow, WithChunkReading
         ]);
     }
 
-    /**
-     * Set chunk size
-     */
+    public function rules(): array
+    {
+        return [
+            'name' => [
+                'required',
+                function ($attribute, $value, $fail) {
+                    $upperName = strtoupper(trim($value));
+                    $exists = Vendor::whereRaw('UPPER(name) LIKE ?', ["%{$upperName}%"])->exists();
+                    if ($exists) {
+                        $fail("Vendor Name \"$upperName\" already in database.");
+                    }
+                }
+            ],
+        ];
+    }
+
+    private function generateCode($vendorGroupId, $consignment)
+    {
+        $vendorgroup = Vendorgroup::findOrFail($vendorGroupId);
+        $groupCode = str_pad($vendorgroup->code, 4, '0', STR_PAD_LEFT);
+
+        $prefix = strtolower(trim($consignment)) === 'yes' ? 'C' : 'D';
+        $codePrefix = $prefix . $groupCode;
+
+        $lastCode = Vendor::where('code', 'like', $codePrefix . '%')
+            ->orderByDesc('code')
+            ->value('code');
+
+        if ($lastCode) {
+            $lastNumber = (int) substr($lastCode, strlen($codePrefix));
+            $newNumber = $lastNumber + 1;
+        } else {
+            $newNumber = 1;
+        }
+
+        $runningNumber = str_pad($newNumber, 2, '0', STR_PAD_LEFT);
+
+        return $codePrefix . $runningNumber;
+    }
+
     public function chunkSize(): int
     {
-        return 500; // bisa disesuaikan
+        return 500;
     }
+    /**
+ * Validasi nilai consignment hanya Yes atau No
+ */
+private function validateConsignment($value)
+{
+    $value = ucfirst(strtolower(trim($value)));
+
+    if (!in_array($value, ['Yes', 'No'])) {
+        // Default ke No jika tidak valid
+        Log::warning("Consignment value Invalid: '$value', diset menjadi 'No'");
+        return 'No';
+    }
+
+    return $value;
+}
+
+/**
+ * Isi vendor fee default 1.5 jika null atau tidak numerik
+ */
+private function sanitizeVendorFee($value)
+{
+    if (!is_numeric($value)) {
+        return 1.5;
+    }
+
+    return (float) $value;
+}
+
 }
