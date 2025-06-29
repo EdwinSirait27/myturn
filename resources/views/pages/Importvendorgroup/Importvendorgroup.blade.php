@@ -176,7 +176,7 @@
             <span class="text-dark">
                 <strong>Important Note:</strong> <br>
                 - for the file use excel xlsx type, csv may not work.<br>
-                - for code and created_at just leave the value blank.<br>
+                                - for code and created_at just leave the value blank.<br>
 
             </span>
         </div>
