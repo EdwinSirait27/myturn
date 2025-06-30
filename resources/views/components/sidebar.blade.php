@@ -94,7 +94,7 @@
                     </ul>
                 </li>
             @endrole
-            @role('HR')
+            @if (session('active_role') === 'HR')
                 <li class="{{ Request::is('dashboardHR') ? 'active' : '' }}">
                     <a class="nav-link" href="{{ url('dashboardHR') }}"><i class="fas fa-house"></i>
                         <span>Dashboard</span></a>
@@ -133,7 +133,7 @@
 
                     </ul>
                 </li>
-            @endrole
+            @endif
 
             @role('HeadBuyer|Buyer')
 

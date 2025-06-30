@@ -311,7 +311,8 @@ class LoginController extends Controller
 
             $user = Auth::user();
             $currentSessionId = $request->session()->getId();
-
+$firstRole = $user->getRoleNames()->first(); // default role aktif
+session(['active_role' => $firstRole]);
             // Cek apakah user sudah memiliki sesi aktif di perangkat lain
             $existingSession = UserSession::where('user_id', $user->id)
                 ->where('session_id', '!=', $currentSessionId)

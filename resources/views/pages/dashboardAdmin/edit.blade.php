@@ -315,7 +315,7 @@
                                         <div class="row mt-3">
 
 
-                                            <div class="col-md-6">
+                                            {{-- <div class="col-md-6">
                                                 <div class="form-group">
                                                     <label for="role" class="form-control-label">
                                                         <i class="fas fa-shield-alt"></i> {{ __('Role') }}
@@ -342,7 +342,38 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </div> --}}
+                                        <div class="col-md-6">
+    <div class="form-group">
+        <label class="form-control-label">
+            <i class="fas fa-shield-alt"></i> {{ __('Role') }}
+        </label>
+
+        <div class="d-flex flex-column gap-1 @error('role') border border-danger rounded-3 p-2 @enderror">
+            @foreach ($roles as $name => $displayName)
+                <div class="form-check">
+                    <input class="form-check-input"
+                           type="checkbox"
+                           name="role[]"
+                           id="role_{{ $name }}"
+                           value="{{ $name }}"
+                           {{ in_array($name, $selectedRole) ? 'checked' : '' }}>
+                    <label class="form-check-label" for="role_{{ $name }}">
+                        {{ $displayName }}
+                    </label>
+                </div>
+            @endforeach
+        </div>
+
+        @error('role')
+            <span class="invalid-feedback d-block" role="alert">
+                <strong>{{ $message }}</strong>
+            </span>
+        @enderror
+    </div>
+    </div>
+</div>
+
 
                                         <div class="alert alert-secondary mt-4" role="alert">
                                             <span class="text-dark">

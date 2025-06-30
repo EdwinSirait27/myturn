@@ -68,6 +68,9 @@ class Kernel extends HttpKernel
        'role' => \Spatie\Permission\Middleware\RoleMiddleware::class, // Perhatikan namespace tanpa 's'
     'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
     'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
+    'check.role' => \App\Http\Middleware\CheckActiveRole::class,
+    'permission.active' => \App\Http\Middleware\PermissionFromActiveRole::class,
+
 
     ];
 }

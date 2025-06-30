@@ -93,8 +93,8 @@ class dashboardAdminController extends Controller
         $userStatus = ['Active', 'Inactive'];
         $selectedStatus = old('status', $user->Employee->status ?? '');
         $roles = Role::pluck('name', 'name')->all();
-        // Change selectedRole to use name instead of id
-        $selectedRole = old('role', optional($user->roles->first())->name ?? '');
+       $selectedRole = old('role', $user->roles->pluck('name')->toArray());
+
         return view('pages.dashboardAdmin.edit', [
             'user' => $user,
             'hashedId' => $hashedId,
@@ -104,6 +104,28 @@ class dashboardAdminController extends Controller
             'selectedRole' => $selectedRole
         ]);
     }
+    // public function edit($hashedId)
+    // {
+    //     $user = User::with('terms', 'roles.permissions', 'Employee')->get()->first(function ($u) use ($hashedId) {
+    //         $expectedHash = substr(hash('sha256', $u->id . env('APP_KEY')), 0, 8);
+    //         return $expectedHash === $hashedId;
+    //     });
+    //     if (!$user) {
+    //         abort(404, 'User not found.');
+    //     }
+    //     $userStatus = ['Active', 'Inactive'];
+    //     $selectedStatus = old('status', $user->Employee->status ?? '');
+    //     $roles = Role::pluck('name', 'name')->all();
+    //     $selectedRole = old('role', optional($user->roles->first())->name ?? '');
+    //     return view('pages.dashboardAdmin.edit', [
+    //         'user' => $user,
+    //         'hashedId' => $hashedId,
+    //         'userStatus' => $userStatus,
+    //         'selectedStatus' => $selectedStatus,
+    //         'roles' => $roles,
+    //         'selectedRole' => $selectedRole
+    //     ]);
+    // }
     public function update(Request $request, $hashedId)
 {
     Log::info('Masuk ke method update', ['hashedId' => $hashedId]);
@@ -131,7 +153,9 @@ class dashboardAdminController extends Controller
             new NoXSSInput()
         ],
         'status' => ['nullable', 'string', 'in:Active,Inactive,Pending,Mutation', new NoXSSInput()],
-        'role' => ['required', 'string', 'exists:roles,name'],
+       'role' => ['required', 'array'],
+'role.*' => ['string', 'exists:roles,name'],
+
         'permissions' => ['nullable'],
     ]);
 
@@ -163,10 +187,9 @@ class dashboardAdminController extends Controller
             Log::info('Employee status berhasil diupdate');
         }
 
-        // Ambil role dan permission
-         // Assign role saja, tanpa manual sync permission
-    $role = Role::findByName($validatedData['role']);
-    $user->syncRoles($role);
+        
+   $user->syncRoles($validatedData['role']); // langsung array of role names
+
 
         DB::commit();
         Log::info('Transaksi berhasil dikommit');
@@ -181,6 +204,82 @@ class dashboardAdminController extends Controller
         return redirect()->route('pages.dashboardAdmin')->with('error', 'Terjadi kesalahan saat mengupdate user.');
     }
 }
+//     public function update(Request $request, $hashedId)
+// {
+//     Log::info('Masuk ke method update', ['hashedId' => $hashedId]);
+
+//     $user = User::with('Terms', 'roles.permissions', 'Employee')->get()->first(function ($u) use ($hashedId) {
+//         $expectedHash = substr(hash('sha256', $u->id . env('APP_KEY')), 0, 8);
+//         return $expectedHash === $hashedId;
+//     });
+
+//     if (!$user) {
+//         Log::warning('User tidak ditemukan dengan hashedId', ['hashedId' => $hashedId]);
+//         return redirect()->route('pages.dashboardAdmin')->with('error', 'ID tidak valid.');
+//     }
+
+//     Log::info('User ditemukan', ['user_id' => $user->id]);
+
+//     $validatedData = $request->validate([
+//         'device_lan_mac' => ['nullable', 'string', 'max:255', new NoXSSInput()],
+//         'device_wifi_mac' => ['nullable', 'string', 'max:255', new NoXSSInput()],
+//         'password' => ['nullable', 'string', 'min:7', 'max:12', new NoXSSInput()],
+//         'username' => [
+//             'required', 'string', 'max:12', 'min:7',
+//             'regex:/^[a-zA-Z0-9_-]+$/',
+//             Rule::unique('users')->ignore($user->id),
+//             new NoXSSInput()
+//         ],
+//         'status' => ['nullable', 'string', 'in:Active,Inactive,Pending,Mutation', new NoXSSInput()],
+//         'role' => ['required', 'string', 'exists:roles,name'],
+//         'permissions' => ['nullable'],
+//     ]);
+
+//     Log::info('Data berhasil divalidasi', ['validatedData' => $validatedData]);
+
+//     $userData = ['username' => $validatedData['username']];
+//     if (!empty($validatedData['password'])) {
+//         $userData['password'] = bcrypt($validatedData['password']);
+//     }
+
+//     DB::beginTransaction();
+
+//     try {
+//         $user->update($userData);
+//         Log::info('User berhasil diupdate', ['user_id' => $user->id]);
+
+//         if ($user->Terms) {
+//             $user->Terms->update([
+//                 'device_wifi_mac' => $validatedData['device_wifi_mac'] ?? null,
+//                 'device_lan_mac' => $validatedData['device_lan_mac'] ?? null,
+//             ]);
+//             Log::info('Terms berhasil diupdate');
+//         }
+
+//         if ($user->Employee) {
+//             $user->Employee->update([
+//                 'status' => $validatedData['status'] ?? 'Active',
+//             ]);
+//             Log::info('Employee status berhasil diupdate');
+//         }
+
+        
+//     $role = Role::findByName($validatedData['role']);
+//     $user->syncRoles($role);
+
+//         DB::commit();
+//         Log::info('Transaksi berhasil dikommit');
+
+//         return redirect()->route('pages.dashboardAdmin')->with('success', 'User Berhasil Diupdate.');
+//     } catch (\Exception $e) {
+//         DB::rollBack();
+//         Log::error('Gagal update user', [
+//             'error' => $e->getMessage(),
+//             'trace' => $e->getTraceAsString()
+//         ]);
+//         return redirect()->route('pages.dashboardAdmin')->with('error', 'Terjadi kesalahan saat mengupdate user.');
+//     }
+// }
 
     public function show($hashedId)
     {
