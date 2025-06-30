@@ -128,16 +128,31 @@ public function logs(Request $request)
 
     abort(404);
 }
- public function importvendor(Request $request)
-    {
-        $request->validate([
-            'file' => 'required|mimes:xlsx,csv,xls'
-        ]);
+//  public function importvendor(Request $request)
+//     {
+//         $request->validate([
+//             'file' => 'required|mimes:xlsx,csv,xls'
+//         ]);
 
-        Excel::import(new Vendorimport, $request->file('file'));
+//         Excel::import(new Vendorimport, $request->file('file'));
 
-        return back()->with('success', 'import vendor success!');
+//         return back()->with('success', 'import vendor success!');
+//     }
+public function importvendor(Request $request)
+{
+    $request->validate([
+        'file' => 'required|mimes:xlsx,csv,xls'
+    ]);
+
+    $import = new Vendorimport;
+    $import->import($request->file('file'));
+
+    if ($import->failures()->isNotEmpty()) {
+        return back()->with('failures', $import->failures());
     }
+
+    return back()->with('success', 'Import vendor success!');
+}
 public function store(Request $request)
 {
     $types = [
@@ -228,11 +243,6 @@ public function store(Request $request)
                      ->withInput();
     }
 }
-
-
-
-
-
 public function getVendors($hashedId)
 {
     $vendorgroup = Vendorgroup::all()->first(function ($u) use ($hashedId) {
@@ -245,8 +255,7 @@ public function getVendors($hashedId)
     $type = request('type');
     $consignment = request('consignment');
     $vendorpkp = request('vendorpkp');
-   $bankName = request('name');
-    
+   $bankName = request('name');   
     $vendors = $vendorgroup->vendors()->with('banks')
         ->when($type, fn($query) => $query->where('type', $type))
         ->when($consignment, fn($query) => $query->where('consignment', $consignment))
@@ -262,7 +271,6 @@ public function getVendors($hashedId)
             'phonenumber', 'consignment', 'vendorpkp', 'salesname', 'salescp',
             'npwpname', 'npwpnumber', 'npwpaddress', 'bank_id','vendorfee', 'description'
         ]);
-
     return DataTables::of($vendors)
         ->addColumn('action', function ($row) {
             return '<a href="' . route('Vendor.edit', $row->id_hashed) . '" class="btn btn-sm btn-primary">Edit</a>';
@@ -270,17 +278,14 @@ public function getVendors($hashedId)
         ->rawColumns(['action'])
         ->make(true);
 }
-
 public function getVendorFilters($hashedId)
 {
     $vendorgroup = Vendorgroup::all()->first(function ($u) use ($hashedId) {
         return substr(hash('sha256', $u->id . env('APP_KEY')), 0, 8) === $hashedId;
     });
-
     if (!$vendorgroup) {
         return response()->json(['error' => 'Vendor group not found.'], 404);
     }
-
     $types = $vendorgroup->vendors()
         ->select('type')
         ->distinct()
@@ -300,9 +305,6 @@ public function getVendorFilters($hashedId)
         ->pluck('vendorpkp')
         ->values();
         $banks = Banks::select('name')->distinct()->orderBy('name')->pluck('name');
-
-
-
     return response()->json([
         'types' => $types,
         'consignments' => $consignments,

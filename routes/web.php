@@ -29,6 +29,7 @@ use App\Http\Controllers\VendorgroupController;
 use App\Http\Controllers\VendorController;
 use App\Http\Controllers\DashboardBuyer;
 use App\Http\Controllers\DashboardHeadbuyer;
+use App\Http\Controllers\DepartController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -224,10 +225,6 @@ Route::get('/Importvendorgroup', [VendorgroupController::class, 'indeximportvend
     });
     Route::group(['middleware' => ['permission:ManageVendor']], function () {
 
-        // Route::get('/Vendorgroup', [VendorgroupController::class, 'index'])
-        //     ->name('pages.Vendorgroup');
-        // Route::get('Vendorgroup/create', [VendorgroupController::class, 'create'])->name('Vendorgroup.create');
-        // Route::post('/Vendorgroup', [VendorgroupController::class, 'store'])->name('Vendorgroup.store');
         Route::get('/Vendor/edit/{hashedId}', [VendorController::class, 'edit'])->name('Vendor.edit');
         Route::get('Vendor/create/{hashedId}', [VendorController::class, 'create'])->name('Vendor.create');
         Route::post('/Vendor', [VendorController::class, 'store'])->name('Vendor.store');
@@ -238,13 +235,16 @@ Route::get('/Importvendor', [VendorController::class, 'indeximportvendor'])
         Route::post('/Importvendor', [VendorController::class, 'importvendor'])->name('Importvendor.vendor');
         Route::get('/Vendor/downloadvendor/{filename}', [VendorController::class, 'downloadvendor'])->name('Vendor.downloadvendor');
 
-        // Route::get('/Vendorgroup/detail/{hashedId}', [VendorController::class, 'detail'])->name('Vendorgroup.detail');
-        // Route::put('/Vendorgroup/{hashedId}', [VendorgroupController::class, 'update'])->name('Vendorgroup.update');
-        // Route::get('/vendorgroups/vendorgroups', [VendorgroupController::class, 'getVendorgroups'])->name('vendorgroups.vendorgroups');
-        // Route::get('/vendors/vendors/{hashedId}', [VendorController::class, 'getVendors'])->name('vendors.vendors');
-        // Route::get('vendorgroup/logs/data', [VendorgroupController::class, 'logs'])->name('vendorgroup.logs');
-        // Route::get('vendor/logs/data', [VendorgroupController::class, 'logs'])->name('vendor.logs');
+    });
+     Route::group(['middleware' => ['permission:ManageDepart']], function () {
 
+        Route::get('/Depart', [DepartController::class, 'index'])
+            ->name('pages.Depart');
+        // Route::get('Uoms/create', [UomsController::class, 'create'])->name('Uoms.create');
+        // Route::post('/Uoms', [UomsController::class, 'store'])->name('Uoms.store');
+        Route::get('/Depart/edit/{hashedId}', [DepartController::class, 'edit'])->name('Depart.edit');
+        // Route::put('/Uoms/{hashedId}', [UomsController::class, 'update'])->name('Uoms.update');
+        Route::get('/depart/depart', [DepartController::class, 'getDeparts'])->name('depart.depart');
     });
     // Brands
     Route::group(['middleware' => ['permission:ManageBrands']], function () {

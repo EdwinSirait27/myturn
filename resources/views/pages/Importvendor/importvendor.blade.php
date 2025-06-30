@@ -94,7 +94,7 @@
             <div class="section-header">
                 <h1>Import Vendor</h1>
             </div>
-           @if ($errors->any())
+           {{-- @if ($errors->any())
                 <div class="alert alert-danger">
                     <ul>
                         @foreach ($errors->all() as $error)
@@ -102,7 +102,21 @@
                         @endforeach
                     </ul>
                 </div>
-            @endif
+            @endif --}}
+                @if(session('failures'))
+    <div class="alert alert-danger">
+        <strong>Error At Line:</strong>
+        <ul>
+            @foreach(session('failures') as $failure)
+                <li>
+                    Line {{ $failure->row() }} - 
+                    Colom: {{ $failure->attribute() }} - 
+                    Message: {{ implode(', ', $failure->errors()) }}
+                </li>
+            @endforeach
+        </ul>
+    </div>
+@endif
             {{-- <div class="section-body">
                 <form id="import-vendor" action="{{ route('Importvendorgroup.vendorgroup') }}" method="POST"
                     enctype="multipart/form-data">

@@ -24,6 +24,8 @@ use Maatwebsite\Excel\Concerns\SkipsOnFailure;
 use Maatwebsite\Excel\Concerns\SkipsFailures;
 use Maatwebsite\Excel\Concerns\WithValidation;
 use Maatwebsite\Excel\Validators\Failure;
+use Maatwebsite\Excel\Concerns\Importable;
+
 class Vendorimport implements ToModel, WithHeadingRow, WithChunkReading,WithValidation, SkipsOnFailure
 {
     /**
@@ -33,7 +35,7 @@ class Vendorimport implements ToModel, WithHeadingRow, WithChunkReading,WithVali
      * @return \Illuminate\Database\Eloquent\Model|null
      */
 
-   use SkipsFailures;
+   use SkipsFailures, Importable;
      public function model(array $row)
     {
         $vendorgroupId = trim($row['vendor_group_id'] ?? '');
@@ -102,14 +104,14 @@ class Vendorimport implements ToModel, WithHeadingRow, WithChunkReading,WithVali
 
     public function rules(): array
     {
-        return [
-            'name' => [
+          return [
+            '*.name' => [
                 'required',
                 function ($attribute, $value, $fail) {
                     $upperName = strtoupper(trim($value));
-                    $exists = Vendor::whereRaw('UPPER(name) LIKE ?', ["%{$upperName}%"])->exists();
+                    $exists = Vendor::whereRaw('UPPER(name) = ?', [$upperName])->exists();
                     if ($exists) {
-                        $fail("Vendor Name \"$upperName\" already in database.");
+                        $fail("Vendor Name \"$upperName\" already exists.");
                     }
                 }
             ],
