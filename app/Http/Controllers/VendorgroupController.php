@@ -98,13 +98,12 @@ class VendorgroupController extends Controller
 
     $query = Vendorgroup::query()->select(['id', 'name', 'code', 'description']);
 
-    // Jika perlu filter berdasarkan role
-  
+   
     return datatables()->eloquent($query)
         ->addColumn('action', function ($vendorGroup) {
             $hashed = UuidHashHelper::encodeUuid($vendorGroup->id);
-            $route = route('Vendorgroup.edit', $hashed); // pastikan route ini benar
-            $route2 = route('Vendorgroup.detail', $hashed); // pastikan route ini benar
+            $route = route('Vendorgroup.edit', $hashed); 
+            $route2 = route('Vendorgroup.detail', $hashed);
             $vendorName = e($vendorGroup->name);
 
             return <<<HTML

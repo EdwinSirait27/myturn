@@ -216,7 +216,7 @@
                                                         <i class="fas fa-user"></i> {{ __('Uoms Code') }}
                                                     </label>
                                                     <div>
-                                                        <input type="text" class="form-control @error('uom_code') is-invalid @enderror" id="uom_code"
+                                                        <input type="text" class="form-control text-uppercase @error('uom_code') is-invalid @enderror" id="uom_code"
                                                             name="uom_code" value="{{ old('uom_code', $uom->uom_code) }}"
                                                             placeholder="PCS" required>
                                                         @error('uom_code')

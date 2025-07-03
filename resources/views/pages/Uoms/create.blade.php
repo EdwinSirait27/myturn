@@ -210,7 +210,7 @@
                                                         <i class="fas fa-user"></i> {{ __('Uom Code') }}
                                                     </label>
                                                     <div>
-                                                        <input type="text" class="form-control @error('uom_code') is-invalid @enderror" id="uom_code" name="uom_code" 
+                                                        <input type="text" class="form-control text-uppercase @error('uom_code') is-invalid @enderror" id="uom_code" name="uom_code" 
                                                             value="{{ old('uom_code') }}" required
                                                             placeholder="Fill uom code">
                                                         @error('uom_code')

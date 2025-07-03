@@ -135,7 +135,7 @@ class BrandsController extends Controller
 // }
 public function store(Request $request)
     {
-        // dd($request->all());
+        
 
         $validated = $request->validate([
              'brand_name' => [
@@ -175,61 +175,114 @@ public function store(Request $request)
     } else {
         $nextNumber = 1;
     }
-
     $nextCode = 'BR' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT); // BR00001, BR00002, dst.
-
     Brands::create([
         'brand_name'  => strtoupper($validated['brand_name']),
         'description'  =>($validated['description']),
         'brand_code'  => $nextCode,
     ]);
-
             DB::commit();
             return redirect()->route('pages.Brands')->with('success', 'Brands created Succesfully!');
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()
-                ->withErrors(['error' => 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage()])
+                ->withErrors(['error' => 'Fatal Error: ' . $e->getMessage()])
                 ->withInput();
         }
     }
-
+    
+    
     public function update(Request $request, $hashedId)
-    {
-        $brands = Brands::get()->first(function ($u) use ($hashedId) {
-            $expectedHash = substr(hash('sha256', $u->id . env('APP_KEY')), 0, 8);
-            return $expectedHash === $hashedId;
-        });
+{
+   $brands = Brands::cursor()->first(function ($u) use ($hashedId) {
+    $expectedHash = substr(hash('sha256', $u->id . env('APP_KEY')), 0, 8);
+    return $expectedHash === $hashedId;
+});
+
         if (!$brands) {
             return redirect()->route('pages.Brands')->with('error', 'ID tidak valid.');
         }
-        $validatedData = $request->validate([
-        disini masih salah untuk brand name full capslock
-            'brand_name' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('brands_tables')->ignore($brands->id),
-                new NoXSSInput()
-            ],
-            'description' => [
-                'required',
-                new NoXSSInput()
-            ],
-        ], [
-            'brand_name.required' => 'brand name wajib diisi.',
-            'brand_name.string' => 'brand name hanya boleh berupa teks.',
-            'brand_name.max' => 'brand name maksimal terdiri dari 255 karakter.',
-            'brand_name.unique' => 'brand name harus unique.',
-            'description.required' => 'description harus terisi.',
-        ]);
-        $brandsData = [
-            'brand_name' => $validatedData['brand_name'],
-            'description' => $validatedData['description'],
-        ];
+
+    $validated = $request->validate([
+        'brand_name' => [
+            'required',
+            'string',
+            'max:255',
+            new NoXSSInput(),
+            function ($attribute, $value, $fail) use ($brands) {
+                $normalized = strtolower(trim(preg_replace('/\s+/', ' ', $value)));
+
+                $exists = Brands::where('id', '!=', $brands->id)
+                    ->get()
+                    ->map(function ($item) {
+                        return strtolower(trim(preg_replace('/\s+/', ' ', $item->name)));
+                    })
+                    ->contains($normalized);
+
+                if ($exists) {
+                    $fail('The ' . $attribute . ' is too similar to an existing name.');
+                }
+            }
+        ],
+        'description' => ['nullable', 'string', 'max:255', new NoXSSInput()],
+    ]);
+
+    try {
         DB::beginTransaction();
-        $brands->update($brandsData);
+
+        $brands->update([
+            'brand_name' => strtoupper($validated['brand_name']),
+            'description' => $validated['description'],
+            // brand_code tidak diubah saat update
+        ]);
+
         DB::commit();
-        return redirect()->route('pages.Brands')->with('success', 'Brands Berhasil Diupdate.');
+        return redirect()->route('pages.Brands')->with('success', 'Brands updated successfully!');
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return redirect()->back()
+            ->withErrors(['error' => 'Terjadi kesalahan saat mengupdate data: ' . $e->getMessage()])
+            ->withInput();
     }
+}
+
+    
+    
+    // public function update(Request $request, $hashedId)
+    // {
+    //     $brands = Brands::get()->first(function ($u) use ($hashedId) {
+    //         $expectedHash = substr(hash('sha256', $u->id . env('APP_KEY')), 0, 8);
+    //         return $expectedHash === $hashedId;
+    //     });
+    //     if (!$brands) {
+    //         return redirect()->route('pages.Brands')->with('error', 'ID tidak valid.');
+    //     }
+    //     $validatedData = $request->validate([
+    //         'brand_name' => [
+    //             'required',
+    //             'string',
+    //             'max:255',
+    //             Rule::unique('brands_tables')->ignore($brands->id),
+    //             new NoXSSInput()
+    //         ],
+    //         'description' => [
+    //             'required',
+    //             new NoXSSInput()
+    //         ],
+    //     ], [
+    //         'brand_name.required' => 'brand name wajib diisi.',
+    //         'brand_name.string' => 'brand name hanya boleh berupa teks.',
+    //         'brand_name.max' => 'brand name maksimal terdiri dari 255 karakter.',
+    //         'brand_name.unique' => 'brand name harus unique.',
+    //         'description.required' => 'description harus terisi.',
+    //     ]);
+    //     $brandsData = [
+    //         'brand_name' => $validatedData['brand_name'],
+    //         'description' => $validatedData['description'],
+    //     ];
+    //     DB::beginTransaction();
+    //     $brands->update($brandsData);
+    //     DB::commit();
+    //     return redirect()->route('pages.Brands')->with('success', 'Brands Berhasil Diupdate.');
+    // }
 }

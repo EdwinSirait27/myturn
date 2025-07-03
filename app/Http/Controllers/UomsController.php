@@ -69,9 +69,25 @@ class UomsController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'uom_code' => ['nullable', 'string','max:255', 'unique:uoms_tables,uom_code',
-                new NoXSSInput()],
-            'uom' => ['required', 'string','max:255', 'unique:uoms_tables,uom',
+                 'uom_code' => [
+                'required',
+                'string',
+                'max:255',
+                new NoXSSInput(),
+                function ($attribute, $value, $fail) {
+                    $normalized = strtolower(trim(preg_replace('/\s+/', ' ', $value))); // hilangkan spasi ganda
+                    $exists = Uoms::all()
+                        ->map(function ($item) {
+                        return strtolower(trim(preg_replace('/\s+/', ' ', $item->name)));
+                    })
+                        ->contains($normalized);
+
+                    if ($exists) {
+                        $fail('The ' . $attribute . ' is too similar to an existing name.');
+                    }
+                }
+            ],
+            'uom' => ['required', 'string','max:255',
                 new NoXSSInput()],
         ], [
             'uom_code.string' => 'uom_code hanya boleh berupa teks.',
@@ -80,7 +96,7 @@ class UomsController extends Controller
             'uom.required' => 'uom_code wajib diisi.',
             'uom.string' => 'uom_code hanya boleh berupa teks.',
             'uom.max' => 'uom_code maksimal terdiri dari 255 karakter.',
-            'uom.unique' => 'code harus unique.',
+
                    ]);
         try {
             DB::beginTransaction();
@@ -145,42 +161,96 @@ class UomsController extends Controller
 //     }
 // }
 
+    // public function update(Request $request, $hashedId)
+    // {
+    //     $uoms = Uoms::get()->first(function ($u) use ($hashedId) {
+    //         $expectedHash = substr(hash('sha256', $u->id . env('APP_KEY')), 0, 8);
+    //         return $expectedHash === $hashedId;
+    //     });
+    //     if (!$uoms) {
+    //         return redirect()->route('pages.Uoms')->with('error', 'ID tidak valid.');
+    //     }
+    //     $validatedData = $request->validate([
+    //         'uom_code' => ['required', 'string', 'max:255',Rule::unique('uoms_tables')->ignore($uoms->id),
+    //         new NoXSSInput()],
+    //         'uom' => ['required', 'string', 'max:255', Rule::unique('uoms_tables')->ignore($uoms->id),
+    //         new NoXSSInput()],
+           
+    //     ], [
+    //         'uom_code.required' => 'uom_code wajib diisi.',
+    //         'uom_code.string' => 'uom_code hanya boleh berupa teks.',
+    //         'uom_code.max' => 'uom_code maksimal terdiri dari 255 karakter.',
+    //         'uom_code.unique' => 'uom_code harus unique.',
+    //         'uom.required' => 'uom_code wajib diisi.',
+    //         'uom.string' => 'uom_code hanya boleh berupa teks.',
+    //         'uom.max' => 'uom_code maksimal terdiri dari 255 karakter.',
+    //         'uom.unique' => 'code harus unique.',
+    //                ]);
+
+    //     $uomsData = [
+    //         'uom_code' => $validatedData['uom_code'],
+    //         'uom' => $validatedData['uom'],
+           
+            
+    //     ];
+    //     DB::beginTransaction();
+    //     $uoms->update($uomsData);
+    //     DB::commit();
+
+    //     return redirect()->route('pages.Uoms')->with('success', 'Uoms Berhasil Diupdate.');
+    // }
+
     public function update(Request $request, $hashedId)
-    {
-        $uoms = Uoms::get()->first(function ($u) use ($hashedId) {
-            $expectedHash = substr(hash('sha256', $u->id . env('APP_KEY')), 0, 8);
-            return $expectedHash === $hashedId;
-        });
+{
+   $uoms = Uoms::cursor()->first(function ($u) use ($hashedId) {
+    $expectedHash = substr(hash('sha256', $u->id . env('APP_KEY')), 0, 8);
+    return $expectedHash === $hashedId;
+});
+
         if (!$uoms) {
             return redirect()->route('pages.Uoms')->with('error', 'ID tidak valid.');
         }
-        $validatedData = $request->validate([
-            'uom_code' => ['required', 'string', 'max:255',Rule::unique('uoms_tables')->ignore($uoms->id),
-            new NoXSSInput()],
-            'uom' => ['required', 'string', 'max:255', Rule::unique('uoms_tables')->ignore($uoms->id),
-            new NoXSSInput()],
-           
-        ], [
-            'uom_code.required' => 'uom_code wajib diisi.',
-            'uom_code.string' => 'uom_code hanya boleh berupa teks.',
-            'uom_code.max' => 'uom_code maksimal terdiri dari 255 karakter.',
-            'uom_code.unique' => 'uom_code harus unique.',
-            'uom.required' => 'uom_code wajib diisi.',
-            'uom.string' => 'uom_code hanya boleh berupa teks.',
-            'uom.max' => 'uom_code maksimal terdiri dari 255 karakter.',
-            'uom.unique' => 'code harus unique.',
-                   ]);
 
-        $uomsData = [
-            'uom_code' => $validatedData['uom_code'],
-            'uom' => $validatedData['uom'],
-           
-            
-        ];
+    $validated = $request->validate([
+        'uom_code' => [
+            'required',
+            'string',
+            'max:255',
+            new NoXSSInput(),
+            function ($attribute, $value, $fail) use ($uoms) {
+                $normalized = strtolower(trim(preg_replace('/\s+/', ' ', $value)));
+
+                $exists = Uoms::where('id', '!=', $uoms->id)
+                    ->get()
+                    ->map(function ($item) {
+                        return strtolower(trim(preg_replace('/\s+/', ' ', $item->name)));
+                    })
+                    ->contains($normalized);
+
+                if ($exists) {
+                    $fail('The ' . $attribute . ' is too similar to an existing name.');
+                }
+            }
+        ],
+        'uom' => ['required', 'string', 'max:255', new NoXSSInput()],
+    ]);
+
+    try {
         DB::beginTransaction();
-        $uoms->update($uomsData);
-        DB::commit();
 
-        return redirect()->route('pages.Uoms')->with('success', 'Uoms Berhasil Diupdate.');
+        $uoms->update([
+            'uom_code' => strtoupper($validated['uom_code']),
+            'uom' => $validated['uom'],
+            // brand_code tidak diubah saat update
+        ]);
+
+        DB::commit();
+        return redirect()->route('pages.Uoms')->with('success', 'Uoms updated successfully!');
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return redirect()->back()
+            ->withErrors(['error' => 'Terjadi kesalahan saat mengupdate data: ' . $e->getMessage()])
+            ->withInput();
     }
+}
 }

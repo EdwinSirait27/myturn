@@ -216,7 +216,7 @@
                                                         <i class="fas fa-id-card"></i> {{ __('Brand Name') }}
                                                     </label>
                                                     <div>
-                                                        <input type="text" class="form-control @error('brand_name') is-invalid @enderror" id="brand_name"
+                                                        <input type="text" class="form-control text-uppercase @error('brand_name') is-invalid @enderror" id="brand_name"
                                                             name="brand_name" value="{{ old('brand_name', $brand->brand_name) }}"
                                                             placeholder="Adidas" required>
                                                         @error('brand_name')

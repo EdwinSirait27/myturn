@@ -140,7 +140,7 @@
             {{-- @role('HeadBuyer|Buyer') --}}
        @if (in_array(session('active_role'), ['HeadBuyer', 'Buyer']))
        
-            <li class="menu-header">Buyer Contoh</li>
+            {{-- <li class="menu-header">Buyer Contoh</li> --}}
             <li class="nav-item dropdown ">
                 <a href="#" class="nav-link has-dropdown" data-toggle="dropdown"><i class="fas fa-columns"></i>
                     <span>Data Master</span></a>
