@@ -183,7 +183,7 @@ return [
         Illuminate\View\ViewServiceProvider::class,
         Spatie\Permission\PermissionServiceProvider::class,
         Barryvdh\DomPDF\ServiceProvider::class,
-
+App\Providers\FortifyServiceProvider::class,
         /*
          * Package Service Providers...
          */

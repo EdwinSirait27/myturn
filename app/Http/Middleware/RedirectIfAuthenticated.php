@@ -58,7 +58,7 @@ public function handle($request, Closure $next, ...$guards)
 {
     if (Auth::check()) {
         $user = auth()->user();
-        $activeRole = session('active_role');
+        $activeRole = session('active_role') ?? $user->active_role ?? $user->getRoleNames()->first();
 
         switch ($activeRole) {
             case 'Admin':
@@ -74,7 +74,6 @@ public function handle($request, Closure $next, ...$guards)
                 return redirect('/dashboardHeadBuyer');
             case 'Buyer':
                 return redirect('/dashboardBuyer');
-            // tambahkan lainnya sesuai kebutuhan
             default:
                 Auth::logout();
                 return redirect('/')->withErrors([
@@ -85,7 +84,4 @@ public function handle($request, Closure $next, ...$guards)
 
     return $next($request);
 }
-
-
-    
 }

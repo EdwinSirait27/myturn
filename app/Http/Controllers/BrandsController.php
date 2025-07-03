@@ -63,76 +63,136 @@ class BrandsController extends Controller
         return view('pages.Brands.create');
     }
    
-    public function store(Request $request)
-{
-    $validatedData = $request->validate([
-        // Hapus validasi uom_code karena akan digenerate
-        'brand_code' => [
-                        'nullable',
-                        'string',
-                        'max:255',
-                        'unique:brands_tables,brand_code',
-                        new NoXSSInput()
-                    ],
-                    'brand_name' => [
-                        'required',
-                        'string',
-                        'max:255',
-                        'unique:brands_tables,brand_name',
-                        new NoXSSInput()
-                    ],
+//     public function store(Request $request)
+// {
+//     $validatedData = $request->validate([
+//         // Hapus validasi uom_code karena akan digenerate
+//         'brand_code' => [
+//                         'nullable',
+//                         'string',
+//                         'max:255',
+//                         'unique:brands_tables,brand_code',
+//                         new NoXSSInput()
+//                     ],
+//                     'brand_name' => [
+//                         'required',
+//                         'string',
+//                         'max:255',
+//                         'unique:brands_tables,brand_name',
+//                         new NoXSSInput()
+//                     ],
         
-                    'description' => [
-                        'required',
-                        new NoXSSInput()
-                    ],
+//                     'description' => [
+//                         'required',
+//                         new NoXSSInput()
+//                     ],
         
-    ], [
-               'brand_code.string' => 'brand_code hanya boleh berupa teks.',
-            'brand_code.max' => 'brand_code maksimal terdiri dari 255 karakter.',
-            'brand_code.unique' => 'brand_code harus unique.',
-            'brand_name.required' => 'brand_name wajib diisi.',
-            'brand_name.string' => 'brand_name hanya boleh berupa teks.',
-            'brand_name.max' => 'brand_name maksimal terdiri dari 255 karakter.',
-            'brand_name.unique' => 'brand_name harus unique.',
-            'description.required' => 'description harus terisi.',
-    ]);
+//     ], [
+//                'brand_code.string' => 'brand_code hanya boleh berupa teks.',
+//             'brand_code.max' => 'brand_code maksimal terdiri dari 255 karakter.',
+//             'brand_code.unique' => 'brand_code harus unique.',
+//             'brand_name.required' => 'brand_name wajib diisi.',
+//             'brand_name.string' => 'brand_name hanya boleh berupa teks.',
+//             'brand_name.max' => 'brand_name maksimal terdiri dari 255 karakter.',
+//             'brand_name.unique' => 'brand_name harus unique.',
+//             'description.required' => 'description harus terisi.',
+//     ]);
 
+//         try {
+//         DB::beginTransaction();
+
+//         // Cari kode terakhir
+//         $lastBrand = DB::table('brands_tables') // Pastikan ini nama tabel yang benar
+//             ->select('brand_code')
+//             ->orderBy('brand_code', 'desc')
+//             ->first();
+
+//         if ($lastBrand && preg_match('/BR(\d+)/', $lastBrand->brand_code, $matches)) {
+//             $lastNumber = (int) $matches[1];
+//             $nextNumber = $lastNumber + 1;
+//         } else {
+//             $nextNumber = 1;
+//         }
+
+//         // Generate uom_code baru
+//         $newCode = 'BR' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
+
+//         // Simpan ke database
+//         $brand = Brands::create([
+//             'brand_code' => $newCode,
+//             'brand_name' => $validatedData['brand_name'],
+//             'description' => $validatedData['description'],
+//         ]);
+
+//         DB::commit();
+//         return redirect()->route('pages.Brands')->with('success', 'Brands created successfully!');
+//     } catch (\Exception $e) {
+//         DB::rollBack();
+//         return redirect()->back()
+//             ->withErrors(['error' => 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage()])
+//             ->withInput();
+//     }
+// }
+public function store(Request $request)
+    {
+        // dd($request->all());
+
+        $validated = $request->validate([
+             'brand_name' => [
+                'required',
+                'string',
+                'max:255',
+                new NoXSSInput(),
+                function ($attribute, $value, $fail) {
+                    $normalized = strtolower(trim(preg_replace('/\s+/', ' ', $value))); // hilangkan spasi ganda
+                    $exists = Brands::all()
+                        ->map(function ($item) {
+                        return strtolower(trim(preg_replace('/\s+/', ' ', $item->name)));
+                    })
+                        ->contains($normalized);
+
+                    if ($exists) {
+                        $fail('The ' . $attribute . ' is too similar to an existing name.');
+                    }
+                }
+            ],
+             'description' => ['nullable', 'string','max:255', new NoXSSInput()],
+              
+        ], [
+         
+        ]);
         try {
         DB::beginTransaction();
 
-        // Cari kode terakhir
-        $lastBrand = DB::table('brands_tables') // Pastikan ini nama tabel yang benar
-            ->select('brand_code')
-            ->orderBy('brand_code', 'desc')
-            ->first();
+            $lastCode = Brands::whereNotNull('brand_code')
+        ->lockForUpdate()
+        ->orderBy('brand_code', 'desc')
+        ->value('brand_code');
 
-        if ($lastBrand && preg_match('/BR(\d+)/', $lastBrand->brand_code, $matches)) {
-            $lastNumber = (int) $matches[1];
-            $nextNumber = $lastNumber + 1;
-        } else {
-            $nextNumber = 1;
-        }
-
-        // Generate uom_code baru
-        $newCode = 'BR' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
-
-        // Simpan ke database
-        $brand = Brands::create([
-            'brand_code' => $newCode,
-            'brand_name' => $validatedData['brand_name'],
-            'description' => $validatedData['description'],
-        ]);
-
-        DB::commit();
-        return redirect()->route('pages.Brands')->with('success', 'Brands created successfully!');
-    } catch (\Exception $e) {
-        DB::rollBack();
-        return redirect()->back()
-            ->withErrors(['error' => 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage()])
-            ->withInput();
+    if ($lastCode) {
+        $number = (int) substr($lastCode, 2); // Hilangkan 'BR'
+        $nextNumber = $number + 1;
+    } else {
+        $nextNumber = 1;
     }
-}
+
+    $nextCode = 'BR' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT); // BR00001, BR00002, dst.
+
+    Brands::create([
+        'brand_name'  => strtoupper($validated['brand_name']),
+        'description'  =>($validated['description']),
+        'brand_code'  => $nextCode,
+    ]);
+
+            DB::commit();
+            return redirect()->route('pages.Brands')->with('success', 'Brands created Succesfully!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->withErrors(['error' => 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage()])
+                ->withInput();
+        }
+    }
 
     public function update(Request $request, $hashedId)
     {
@@ -144,7 +204,7 @@ class BrandsController extends Controller
             return redirect()->route('pages.Brands')->with('error', 'ID tidak valid.');
         }
         $validatedData = $request->validate([
-        
+        disini masih salah untuk brand name full capslock
             'brand_name' => [
                 'required',
                 'string',

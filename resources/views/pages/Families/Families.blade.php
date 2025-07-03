@@ -1,9 +1,10 @@
 @extends('layouts.app')
-@section('title', 'Departements')
+@section('title', 'Families')
 @push('styles')
     <link rel="stylesheet" href="{{ asset('library/jqvmap/dist/jqvmap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('library/summernote/dist/summernote-bs4.min.css') }}">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+@endpush
 <style>
     .card {
         border: none;
@@ -160,22 +161,20 @@
         }
     }
 </style>
-    @endpush
-
 
 
 @section('main')
     <div class="main-content">
         <section class="section">
             <div class="section-header">
-                <h1>Departments</h1>
+                <h1>Families</h1>
             </div>
             <div class="section-body">
                 <div class="row">
                     <div class="col-12">
                         <div class="card">
                             <div class="card-header">
-                                <h6><i class="fas fa-user-shield"></i> List Departments</h6>
+                                <h6><i class="fas fa-user-shield"></i> List Families</h6>
                             </div>
 
                             <div class="card-body">
@@ -184,18 +183,18 @@
                                         <thead>
                                             <tr>
                                                 <th class="text-center">No.</th>
-                                                <th class="text-center">Name</th>
+                                                <th class="text-center">Sub Categories Name</th>
+                                                <th class="text-center">Families Name</th>
                                                 <th class="text-center">Code</th>
-                                            
-                                            <th class="text-center">Action</th>
+                                                <th class="text-center">Action</th>
                                             </tr>
                                         </thead>
                                     </table>
                                 </div>
                                 <div class="action-buttons">
-                                    <button type="button" onclick="window.location='{{ route('Depart.create') }}'"
+                                    <button type="button" onclick="window.location='{{ route('Families.create') }}'"
                                         class="btn btn-primary btn-sm">
-                                        <i class="fas fa-plus-circle"></i> Create Departments
+                                        <i class="fas fa-plus-circle"></i> Create Families
                                     </button>
                                 </div>
                             </div>
@@ -217,7 +216,7 @@
                 processing: true,
                 serverSide: true,
                 ajax: {
-                    url: '{{ route('depart.depart') }}',
+                    url: '{{ route('families.families') }}',
                     type: 'GET'
                 },
                 responsive: true,
@@ -233,13 +232,17 @@
                         data: null,
                         name: 'id',
                         className: 'text-center align-middle',
-                         orderable: false,
+                        orderable: false,
                         searchable: false,
                         render: function(data, type, row, meta) {
                             return meta.row + meta.settings._iDisplayStart + 1;
                         }
                     },
-                    
+                    {
+                        data: 'subcat.name',
+                        name: 'subcat.name',
+                        className: 'text-center'
+                    },
                     {
                         data: 'name',
                         name: 'name',

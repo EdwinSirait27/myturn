@@ -6,12 +6,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Ramsey\Uuid\Uuid;
 
-class Family extends Model
+class Subfamilies extends Model
 {
-    use HasFactory;
+  use HasFactory;
     public $incrementing = false;
     protected $keyType = 'string';
-     protected static function boot()
+ protected static function boot()
     {
  
  
@@ -23,10 +23,10 @@ class Family extends Model
                 $model->{$model->getKeyName()} = Uuid::uuid7()->toString();
             }
 
-            $subcat = \App\Models\Subcat::find($model->subcategories_id);
-            if ($subcat && $subcat->code) {
+            $families = \App\Models\Family::find($model->families_id);
+            if ($families && $families->code) {
                 // Pastikan prefix 6 digit
-                $prefix = str_pad($subcat->code, 6, '0', STR_PAD_LEFT); // contoh: "000123"
+                $prefix = str_pad($families->code, 8, '0', STR_PAD_LEFT); // contoh: "000123"
 
                 // Lock baris terakhir berdasarkan prefix
                 $lastCode = self::where('code', 'like', $prefix . '%')
@@ -39,24 +39,23 @@ class Family extends Model
 
                 // Tambah +1 dan format jadi 2 digit
                 $newNumber = str_pad($lastNumber + 1, 2, '0', STR_PAD_LEFT);
-
                 // Gabungkan jadi 8 digit kode
                 $model->code = $prefix . $newNumber;
             } else {
-                throw new \Exception('Subkategori tidak ditemukan atau tidak memiliki kode.');
+                throw new \Exception('families not found or doesnt have a code.');
             }
         });
     });
 }
 
-    protected $table = 'family'; 
+    protected $table = 'subfamily'; 
     protected $fillable = [
-        'subcategories_id',
+        'families_id',
         'name',
         'code',
     ];
-     public function subcat()
+     public function families()
     {
-        return $this->belongsTo(Subcat::class, 'subcategories_id', 'id');
+        return $this->belongsTo(Family::class, 'families_id', 'id');
     }
 }

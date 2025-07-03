@@ -311,8 +311,18 @@ class LoginController extends Controller
 
             $user = Auth::user();
             $currentSessionId = $request->session()->getId();
-$firstRole = $user->getRoleNames()->first(); // default role aktif
-session(['active_role' => $firstRole]);
+// $firstRole = $user->getRoleNames()->first(); // default role aktif
+// session(['active_role' => $firstRole]);
+if (!session()->has('active_role')) {
+    if ($user->active_role && $user->hasRole($user->active_role)) {
+        session(['active_role' => $user->active_role]);
+    } else {
+        $firstRole = $user->getRoleNames()->first();
+        session(['active_role' => $firstRole]);
+    }
+}
+
+
             // Cek apakah user sudah memiliki sesi aktif di perangkat lain
             $existingSession = UserSession::where('user_id', $user->id)
                 ->where('session_id', '!=', $currentSessionId)
@@ -412,31 +422,29 @@ session(['active_role' => $firstRole]);
             }
 
             // Redirect berdasarkan role menggunakan Spatie
-            $dashboardRoutes = [
-                'Admin' => 'pages.dashboardAdmin',
-                'HeadHR' => 'pages.dashboardHR',
-                'HR' => 'pages.dashboardHR',
-                'head-warehouse' => 'pages.dashboarHeadWarehouse',
-                'HeadBuyer' => 'pages.dashboardHeadBuyer',
-                'Buyer' => 'pages.dashboardBuyer',
-                'cashier-store' => 'pages.dashboardKasir',
-                'supervisor-store' => 'pages.dashboardSupervisor',
-                'ManagerStore' => 'pages.dashboardManager'
-            ];
+          $activeRole = session('active_role') ?? $user->active_role ?? $user->getRoleNames()->first();
 
-            foreach ($dashboardRoutes as $role => $route) {
-                if ($user->hasRole($role)) {
-                    Log::info("User {$normalizedUsername} logged in with role: {$role}");
-                    \Log::debug('User permissions: ' . auth()->user()->getPermissionsViaRoles()->pluck('name'));
-                    return redirect()->route($route)->with('success', 'Login Success , Goodluck!!!');
-                }
-            }
+$dashboardRoutes = [
+    'Admin' => 'pages.dashboardAdmin',
+    'HeadHR' => 'pages.dashboardHR',
+    'HR' => 'pages.dashboardHR',
+    'head-warehouse' => 'pages.dashboarHeadWarehouse',
+    'HeadBuyer' => 'pages.dashboardHeadBuyer',
+    'Buyer' => 'pages.dashboardBuyer',
+    'cashier-store' => 'pages.dashboardKasir',
+    'supervisor-store' => 'pages.dashboardSupervisor',
+    'ManagerStore' => 'pages.dashboardManager'
+];
 
+if (isset($dashboardRoutes[$activeRole])) {
+    Log::info("User {$normalizedUsername} redirected to dashboard with active role: {$activeRole}");
+    return redirect()->route($dashboardRoutes[$activeRole])->with('success', 'Login Success, Goodluck!!!');
+}
 
-            // Fallback untuk role tidak dikenal
-            Log::warning("User {$normalizedUsername} has no valid role assigned");
-            Auth::logout();
-            return redirect('/')->with('warning', 'Your Account is not allowed to use this system.');
+// Fallback
+Log::warning("User {$normalizedUsername} has no valid role assigned");
+Auth::logout();
+return redirect('/')->with('warning', 'Your Account is not allowed to use this system.');
 
         } catch (\Exception $e) {
             Log::error("Login error: " . $e->getMessage());

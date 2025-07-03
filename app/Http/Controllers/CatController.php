@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cat;
 use App\Models\Depart;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
@@ -9,25 +10,22 @@ use App\Rules\NoXSSInput;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use App\Helpers\UuidHashHelper;
-class DepartController extends Controller
+
+class CatController extends Controller
 {
-      public function index()
+        public function index()
     {
-        return view('pages.Depart.Depart');
+        return view('pages.Cat.Cat');
     }
-      public function create()
-    {
-        return view('pages.Depart.create');
-    }
-   public function getDeparts()
+   public function getCats()
 {
-    $query = Depart::query()->select(['id', 'name', 'code']);
+    $query = Cat::query()->select(['id', 'departments_id','name', 'code'])->with('departments');
     return datatables()->eloquent($query)
-        ->addColumn('action', function ($depart) {
-            $hashed = UuidHashHelper::encodeUuid($depart->id);
-            $route = route('Depart.edit', $hashed);
+        ->addColumn('action', function ($cat) {
+            $hashed = UuidHashHelper::encodeUuid($cat->id);
+            $route = route('Cat.edit', $hashed);
             return <<<HTML
-<a href="{$route}" class="mx-3" title="Edit Departments">
+<a href="{$route}" class="mx-3" title="Edit Categories">
     <i class="fas fa-user-edit text-secondary"></i>
 </a>
 HTML;
@@ -45,14 +43,14 @@ HTML;
     }
 
     // Cari langsung di DB tanpa load semua data
-    $depart = Depart::findOrFail($uuid);
+    $cat = Cat::findOrFail($uuid);
 
-    return view('pages.Depart.edit', [
-        'depart' => $depart,
+    return view('pages.Cat.edit', [
+        'cat' => $cat,
         'hashedId' => $hashedId,
     ]);
 }
-public function store(Request $request)
+ public function store(Request $request)
     {
         // dd($request->all());
 
@@ -64,7 +62,7 @@ public function store(Request $request)
                 new NoXSSInput(),
                 function ($attribute, $value, $fail) {
                     $normalized = strtolower(trim(preg_replace('/\s+/', ' ', $value))); // hilangkan spasi ganda
-                    $exists = Depart::all()
+                    $exists = Cat::all()
                         ->map(function ($item) {
                         return strtolower(trim(preg_replace('/\s+/', ' ', $item->name)));
                     })
@@ -75,30 +73,26 @@ public function store(Request $request)
                     }
                 }
             ],
-              
+              'departments_id' => ['required','exists:departments,id', 
+                new NoXSSInput()],
+         
+            
         ], [
          
         ]);
         try {
         DB::beginTransaction();
 
-            // Ambil kode terakhir, cast ke angka, lalu naikkan 1
-            $lastCode = Depart::lockForUpdate()
-                ->max(DB::raw('CAST(code AS UNSIGNED)'));
-
-            $nextNumber = ($lastCode ?? 0) + 1;
-            $nextCode = str_pad($nextNumber, 2, '0', STR_PAD_LEFT); // Jadi 00001, 00002, dll
-
-            Depart::create([
+          
+            Cat::create([
                 'name' => strtoupper($validated['name']),
 
-                'code' => $nextCode,
- 
+                   'departments_id' => $validated['departments_id'], 
             
             ]);
 
             DB::commit();
-            return redirect()->route('pages.Depart')->with('success', 'Department created Succesfully!');
+            return redirect()->route('pages.Cat')->with('success', 'Categories created Succesfully!');
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()
@@ -106,6 +100,13 @@ public function store(Request $request)
                 ->withInput();
         }
     }
+   public function create()
+    {
+    $departments = Depart::select('id', 'name')->get();
+
+        return view('pages.Cat.create',compact('departments'));
+    }
+
  
 //     public function create()
 //     {

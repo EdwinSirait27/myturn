@@ -18,7 +18,7 @@ class DepartmentController extends Controller
     }
     public function getDepartments()
     {
-        $departments = Departments::with('user.Employee')->select(['id', 'department_name','manager_id'])
+        $departments = Departments::with('user.Employee')->select(['id', 'department_name', 'manager_id'])
             ->get()
             ->map(function ($department) {
                 $department->id_hashed = substr(hash('sha256', $department->id . env('APP_KEY')), 0, 8);
@@ -29,18 +29,18 @@ class DepartmentController extends Controller
                 return $department;
             });
         return DataTables::of($departments)
-        ->addColumn('employee_name', function ($department) {
-            return !empty($department->user->Employee) && !empty($department->user->Employee->employee_name)
-                ? $department->user->Employee->employee_name
-                : 'Empty';
-        })
-            ->rawColumns(['action','employee_name'])
+            ->addColumn('employee_name', function ($department) {
+                return !empty($department->user->Employee) && !empty($department->user->Employee->employee_name)
+                    ? $department->user->Employee->employee_name
+                    : 'Empty';
+            })
+            ->rawColumns(['action', 'employee_name'])
             ->make(true);
     }
     public function edit($hashedId)
     {
         $department = Departments::with('user.Employee')->get()->first(function ($u) use ($hashedId) {
-            $expectedHash = substr(                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     hash('sha256', $u->id . env('APP_KEY')), 0, 8);
+            $expectedHash = substr(hash('sha256', $u->id . env('APP_KEY')), 0, 8);
             return $expectedHash === $hashedId;
         });
 
@@ -55,37 +55,41 @@ class DepartmentController extends Controller
             'managers' => $managers,
         ]);
     }
- 
     public function create()
     {
         $managers = User::with('Employee')->get();
-        return view('pages.Department.create',compact('managers'));
+        return view('pages.Department.create', compact('managers'));
     }
-
     public function store(Request $request)
     {
         // dd($request->all());
-
         $validatedData = $request->validate([
-            'department_name' => ['required', 'string','max:255', 'unique:departments_tables,department_name',
-                new NoXSSInput()],
-            'manager_id' => ['required','max:255', 
-                new NoXSSInput()],
-            
+            'department_name' => [
+                'required',
+                'string',
+                'max:255',
+                'unique:departments_tables,department_name',
+                new NoXSSInput()
+            ],
+            'manager_id' => [
+                'required',
+                'max:255',
+                new NoXSSInput()
+            ],
         ], [
-           'department_name.required' => 'Department name is required.',
-'department_name.string' => 'Department name must be a string.',
-'department_name.max' => 'Department name may not be greater than 255 characters.',
-'department_name.unique' => 'Department name must be unique or already exists.',
-'manager_id.required' => 'Manager is required.',
-'manager_id.max' => 'Manager may not be greater than 255 characters.',
-'manager_id.string' => 'Manager must be a string.',
+            'department_name.required' => 'Department name is required.',
+            'department_name.string' => 'Department name must be a string.',
+            'department_name.max' => 'Department name may not be greater than 255 characters.',
+            'department_name.unique' => 'Department name must be unique or already exists.',
+            'manager_id.required' => 'Manager is required.',
+            'manager_id.max' => 'Manager may not be greater than 255 characters.',
+            'manager_id.string' => 'Manager must be a string.',
         ]);
         try {
             DB::beginTransaction();
             $department = Departments::create([
-                'department_name' => $validatedData['department_name'], 
-                'manager_id' => $validatedData['manager_id'], 
+                'department_name' => $validatedData['department_name'],
+                'manager_id' => $validatedData['manager_id'],
             ]);
             DB::commit();
             return redirect()->route('pages.Department')->with('success', 'Department created Succesfully!');
@@ -106,22 +110,31 @@ class DepartmentController extends Controller
             return redirect()->route('pages.Department')->with('error', 'ID tidak valid.');
         }
         $validatedData = $request->validate([
-            'department_name' => ['required', 'string', 'max:255',Rule::unique('departments_tables')->ignore($department->id),
-            new NoXSSInput()],
-            'manager_id' => ['required', 'string', 'max:255',
-            new NoXSSInput()],
+            'department_name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('departments_tables')->ignore($department->id),
+                new NoXSSInput()
+            ],
+            'manager_id' => [
+                'required',
+                'string',
+                'max:255',
+                new NoXSSInput()
+            ],
 
         ], [
             'department_name.required' => 'name wajib diisi.',
             'manager_id.required' => 'Manager wajib diisi.',
             'department_name.string' => 'name hanya boleh berupa teks.',
-            
+
         ]);
 
         $departmentData = [
             'department_name' => $validatedData['department_name'],
             'manager_id' => $validatedData['manager_id'],
-            
+
         ];
         DB::beginTransaction();
         $department->update($departmentData);

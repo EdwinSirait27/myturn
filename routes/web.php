@@ -30,6 +30,10 @@ use App\Http\Controllers\VendorController;
 use App\Http\Controllers\DashboardBuyer;
 use App\Http\Controllers\DashboardHeadbuyer;
 use App\Http\Controllers\DepartController;
+use App\Http\Controllers\CatController;
+use App\Http\Controllers\SubcatController;
+use App\Http\Controllers\FamiliesController;
+use App\Http\Controllers\SubfamiliesController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -53,17 +57,15 @@ Route::middleware(['auth', 'check.role:ManagerStore'])->group(function () {
 });
 
 Route::middleware(['auth', 'check.role:Kasir'])->group(function () {
-    Route::group(['middleware' => ['permission:permission.active:dashboardKasir']], function () {
+    Route::group(['middleware' => ['permission.active:dashboardKasir']], function () {
 
     Route::get('/dashboardKasir', [dashboardKasirController::class, 'index'])->name('pages.dashboardKasir');
 });
 });
 Route::middleware(['auth', 'check.role:Admin,HeadHR,HR,Buyer,HeadBuyer'])->group(function () {
-    Route::get('/feature-profile', function () {
-        return view('pages.feature-profile', ['type_menu' => 'features']);
-    });
+  
     Route::put('/feature-profile/update', [UserprofileController::class, 'updatePassword'])->name('feature-profile.update');
-    Route::put('/feature-profile', [UserprofileController::class, 'index'])->name('feature-profile');
+    Route::get('/feature-profile', [UserprofileController::class, 'index'])->name('feature-profile');
 
     Route::match(['GET', 'POST'], '/logout', [LoginController::class, 'destroy'])
         ->name('logout');
@@ -81,7 +83,7 @@ Route::middleware(['auth', 'check.role:Admin'])->group(function () {
         Route::put('/dashboardAdmin/{hashedId}', [dashboardAdminController::class, 'update'])->name('dashboardAdmin.update');
         Route::get('/users/users', [dashboardAdminController::class, 'getUsers'])->name('users.users');
     });
-    Route::group(['middleware' => ['permission:permission.active:manageRolesPermissions']], function () {
+    Route::group(['middleware' => ['permission.active:ManageRolesPermissions']], function () {
         Route::get('/roles', [RoleController::class, 'index'])
             ->name('roles.index');
         Route::get('roles/create', [RoleController::class, 'create'])->name('roles.create');
@@ -99,7 +101,7 @@ Route::middleware(['auth', 'check.role:Admin'])->group(function () {
     });
 });
 Route::middleware(['auth'])->group(function () {
-    Route::group(['middleware' => ['permission:permission.active:manageActivity']], function () {
+    Route::group(['middleware' => ['permission.active:manageActivity']], function () {
         Route::get('/Activity', [ActivityController::class, 'index'])->name('pages.Activity');
         Route::get('/Activity/show/{hashedId}', [ActivityController::class, 'show'])->name('Activity.show');
         Route::get('/activity/activity', [ActivityController::class, 'getActivity'])->name('activity.activity');
@@ -117,13 +119,13 @@ Route::middleware(['auth', 'check.role:HeadBuyer'])->group(function () {
 
 Route::middleware(['auth', 'check.role:Buyer'])->group(function () {
 
-    Route::group(['middleware' => ['permission:permission.active:dashboardBuyer']], function () {
+    Route::group(['middleware' => ['permission.active:dashboardBuyer']], function () {
 
         Route::get('/dashboardBuyer', [DashboardBuyer::class, 'index'])
             ->name('pages.dashboardBuyer');
     });
 });
-Route::middleware(['auth', 'check.role:HR'])->group(function () {
+Route::middleware(['auth', 'check.role:HR,HeadHR'])->group(function () {
 
 Route::group(['middleware' => ['permission.active:dashboardHR']], function () {
     Route::get('/dashboardHR', [DashboardHRController::class, 'index'])
@@ -133,7 +135,7 @@ Route::group(['middleware' => ['permission.active:dashboardHR']], function () {
 
 
 Route::middleware(['auth'])->group(function () {
-Route::group(['middleware' => ['permission:permission.active:ManageEmployee']], function () {
+Route::group(['middleware' => ['permission.active:ManageEmployee']], function () {
     Route::get('/Employee', [EmployeeController::class, 'index'])
         ->name('pages.Employee');
     Route::get('Employee/create', [EmployeeController::class, 'create'])->name('Employee.create');
@@ -166,7 +168,7 @@ Route::group(['middleware' => ['permission:permission.active:ManageEmployee']], 
 
 Route::middleware(['auth'])->group(function () {
 
-Route::group(['middleware' => ['permission:permission.active:ManageEmployee']], function () {
+Route::group(['middleware' => ['permission.active:ManageEmployee']], function () {
     //payrolls
     Route::get('/Payrolls', [PayrollsController::class, 'index'])
         ->name('pages.Payrolls');
@@ -185,7 +187,7 @@ Route::group(['middleware' => ['permission:permission.active:ManageEmployee']], 
 Route::middleware(['auth'])->group(function () {
 
 // Position    
-Route::group(['middleware' => ['permission:permission.active:ManagePositions']], function () {
+Route::group(['middleware' => ['permission.active:ManagePositions']], function () {
 
     Route::get('/Position', [PositionController::class, 'index'])
         ->name('pages.Position');
@@ -201,7 +203,7 @@ Route::group(['middleware' => ['permission:permission.active:ManagePositions']],
 Route::middleware(['auth'])->group(function () {
 
 // Department    
-Route::group(['middleware' => ['permission:permission.active:ManageDepartments']], function () {
+Route::group(['middleware' => ['permission.active:ManageDepartments']], function () {
 
     Route::get('/Department', [DepartmentController::class, 'index'])
         ->name('pages.Department');
@@ -216,7 +218,7 @@ Route::group(['middleware' => ['permission:permission.active:ManageDepartments']
 Route::middleware(['auth'])->group(function () {
 
 // store  
-Route::group(['middleware' => ['permission:permission.active:ManageStores']], function () {
+Route::group(['middleware' => ['permission.active:ManageStores']], function () {
 
     Route::get('/Store', [StoreController::class, 'index'])
         ->name('pages.Store');
@@ -230,7 +232,7 @@ Route::group(['middleware' => ['permission:permission.active:ManageStores']], fu
 
 Route::middleware(['auth'])->group(function () {
 
-Route::group(['middleware' => ['permission:permission.active:ManageBanks']], function () {
+Route::group(['middleware' => ['permission.active:ManageBanks']], function () {
 
     Route::get('/Banks', [BanksController::class, 'index'])
         ->name('pages.Banks');
@@ -307,6 +309,71 @@ Route::group(['middleware' => ['permission.active:ManageDepart']], function () {
     Route::get('/Depart/edit/{hashedId}', [DepartController::class, 'edit'])->name('Depart.edit');
     // Route::put('/Uoms/{hashedId}', [UomsController::class, 'update'])->name('Uoms.update');
     Route::get('/depart/depart', [DepartController::class, 'getDeparts'])->name('depart.depart');
+      Route::get('Depart/create', [DepartController::class, 'create'])->name('Depart.create');
+    Route::post('/Depart', [DepartController::class, 'store'])->name('Depart.store');
+});
+});
+
+Route::middleware(['auth'])->group(function () {
+
+Route::group(['middleware' => ['permission.active:ManageCategories']], function () {
+
+    Route::get('/Cat', [CatController::class, 'index'])
+        ->name('pages.Cat');
+    // Route::get('Uoms/create', [UomsController::class, 'create'])->name('Uoms.create');
+    // Route::post('/Uoms', [UomsController::class, 'store'])->name('Uoms.store');
+    Route::get('/Cat/edit/{hashedId}', [CatController::class, 'edit'])->name('Cat.edit');
+    // Route::put('/Uoms/{hashedId}', [UomsController::class, 'update'])->name('Uoms.update');
+    Route::get('/cats/cats', [CatController::class, 'getCats'])->name('cats.cats');
+      Route::get('Cat/create', [CatController::class, 'create'])->name('Cat.create');
+    Route::post('/Cat', [CatController::class, 'store'])->name('Cat.store');
+});
+});
+Route::middleware(['auth'])->group(function () {
+
+Route::group(['middleware' => ['permission.active:ManageFamilies']], function () {
+
+    Route::get('/Families', [FamiliesController::class, 'index'])
+        ->name('pages.Families');
+    // Route::get('Uoms/create', [UomsController::class, 'create'])->name('Uoms.create');
+    // Route::post('/Uoms', [UomsController::class, 'store'])->name('Uoms.store');
+    Route::get('/Families/edit/{hashedId}', [FamiliesController::class, 'edit'])->name('Families.edit');
+    // Route::put('/Uoms/{hashedId}', [UomsController::class, 'update'])->name('Uoms.update');
+    Route::get('/families/families', [FamiliesController::class, 'getFamilies'])->name('families.families');
+      Route::get('Families/create', [FamiliesController::class, 'create'])->name('Families.create');
+    Route::post('/Families', [FamiliesController::class, 'store'])->name('Families.store');
+});
+});
+
+Route::middleware(['auth'])->group(function () {
+
+Route::group(['middleware' => ['permission.active:ManageSubcategories']], function () {
+
+    Route::get('/Subcat', [SubcatController::class, 'index'])
+        ->name('pages.Subcat');
+    // Route::get('Uoms/create', [UomsController::class, 'create'])->name('Uoms.create');
+    // Route::post('/Uoms', [UomsController::class, 'store'])->name('Uoms.store');
+    Route::get('/Subcat/edit/{hashedId}', [SubcatController::class, 'edit'])->name('Subcat.edit');
+    // Route::put('/Uoms/{hashedId}', [UomsController::class, 'update'])->name('Uoms.update');
+    Route::get('/subcats/subcats', [SubcatController::class, 'getSubcats'])->name('subcats.subcats');
+      Route::get('Subcat/create', [SubcatController::class, 'create'])->name('Subcat.create');
+    Route::post('/Subcat', [SubcatController::class, 'store'])->name('Subcat.store');
+});
+});
+
+Route::middleware(['auth'])->group(function () {
+
+Route::group(['middleware' => ['permission.active:ManageSubfamilies']], function () {
+
+    Route::get('/Subfamilies', [SubfamiliesController::class, 'index'])
+        ->name('pages.Subfamilies');
+    // Route::get('Uoms/create', [UomsController::class, 'create'])->name('Uoms.create');
+    // Route::post('/Uoms', [UomsController::class, 'store'])->name('Uoms.store');
+    Route::get('/Subfamilies/edit/{hashedId}', [SubfamiliesController::class, 'edit'])->name('Subfamilies.edit');
+    // Route::put('/Uoms/{hashedId}', [UomsController::class, 'update'])->name('Uoms.update');
+    Route::get('/subfamilies/subfamilies', [SubfamiliesController::class, 'getSubfamilies'])->name('subfamilies.subfamilies');
+      Route::get('Subfamilies/create', [SubfamiliesController::class, 'create'])->name('Subfamilies.create');
+    Route::post('/Subfamilies', [SubfamiliesController::class, 'store'])->name('Subfamilies.store');
 });
 });
 
@@ -325,21 +392,21 @@ Route::group(['middleware' => ['permission.active:ManageBrands']], function () {
 });
 });
 
-Route::middleware(['auth'])->group(function () {
+// Route::middleware(['auth'])->group(function () {
 
-// Categories
-Route::group(['middleware' => ['permission.active:ManageCategories']], function () {
+// // Categories
+// Route::group(['middleware' => ['permission.active:ManageCategories']], function () {
 
-    Route::get('/Categories', [CategoriesController::class, 'index'])
-        ->name('pages.Categories');
-    Route::get('Categories/create', [CategoriesController::class, 'create'])->name('Categories.create');
-    Route::post('/Categories', [CategoriesController::class, 'store'])->name('Categories.store');
-    // Route::get('/Categories/edit/{hashedId}', [CategoriesController::class, 'edit'])->name('Categories.edit');
-// Route::put('/Categories/{hashedId}', [CategoriesController::class, 'update'])->name('Categories.update');
-    Route::get('/categories/categories', [CategoriesController::class, 'getCategories'])->name('categories.categories');
-    Route::get('categories/tree', [CategoriesController::class, 'getCategoryTree'])->name('categories.tree');
-});
-});
+//     Route::get('/Categories', [CategoriesController::class, 'index'])
+//         ->name('pages.Categories');
+//     Route::get('Categories/create', [CategoriesController::class, 'create'])->name('Categories.create');
+//     Route::post('/Categories', [CategoriesController::class, 'store'])->name('Categories.store');
+//     // Route::get('/Categories/edit/{hashedId}', [CategoriesController::class, 'edit'])->name('Categories.edit');
+// // Route::put('/Categories/{hashedId}', [CategoriesController::class, 'update'])->name('Categories.update');
+//     Route::get('/categories/categories', [CategoriesController::class, 'getCategories'])->name('categories.categories');
+//     Route::get('categories/tree', [CategoriesController::class, 'getCategoryTree'])->name('categories.tree');
+// });
+// });
 
 Route::middleware(['auth'])->group(function () {
 
@@ -399,8 +466,6 @@ Route::group(['middleware' => ['permission.active:ManageCompanies']], function (
     Route::get('/company/company', [CompanyController::class, 'getCompanys'])->name('company.company');
 });
 });
-
-
 
 Route::group(['middleware' => 'guest'], function () {
     Route::middleware(['throttle:10,1'])->group(function () {

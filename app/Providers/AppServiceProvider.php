@@ -6,6 +6,8 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Event;
 use Spatie\Activitylog\Models\Activity;
+use Laravel\Fortify\Contracts\LoginResponse;
+use App\Http\Responses\CustomLoginResponse;
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -15,7 +17,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+       $this->app->singleton(LoginResponse::class, CustomLoginResponse::class);
     }
 
     /**

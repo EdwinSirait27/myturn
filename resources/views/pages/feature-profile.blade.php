@@ -114,6 +114,54 @@
 
                                     </div>
                                 </div>
+
+                  {{-- <div class="form-group">
+        <label for="role">Pilih Role</label>
+        <select name="role[]" id="role" class="form-control" multiple>
+            @foreach($roles as $key => $role)
+                <option value="{{ $key }}" {{ in_array($key, $selectedRole) ? 'selected' : '' }}>{{ $role }}</option>
+            @endforeach
+        </select>
+        @error('role')
+            <small class="text-danger">{{ $message }}</small>
+        @enderror
+    </div> --}}
+
+     <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="role" class="form-control-label">
+                                                            <i class="fas fa-shield-alt"></i> {{ __('Role') }}
+                                                        </label>
+                                                        <div class="@error('role') border border-danger rounded-3 @enderror">
+                                                            <select class="form-control @error('role') is-invalid @enderror" name="role" id="role" required>
+                                                                {{-- <option value="" disabled selected>Choose Roles</option> --}}
+                                                               @foreach($roles as $key => $role)
+            <option value="{{ $key }}" {{ $key == $selectedRole ? 'selected' : '' }}>{{ $role }}</option>
+        @endforeach
+                                                            </select>
+                                                            @error('role')
+                                                                <span class="invalid-feedback" role="alert">
+                                                                    <strong>{{ $message }}</strong>
+                                                                </span>
+                                                            @enderror
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                     {{-- <div class="col-md-6">
+    <div class="form-group">
+    <label for="role">Pilih Role</label>
+    <select name="role" id="role" class="form-control">
+        <option value="" disabled selected>Pilih salah satu role</option>
+        @foreach($roles as $key => $role)
+            <option value="{{ $key }}" {{ $key == $selectedRole ? 'selected' : '' }}>{{ $role }}</option>
+        @endforeach
+    </select>
+    @error('role')
+        <small class="text-danger">{{ $message }}</small>
+    @enderror
+</div> --}}
+
                                 <div class="card-footer d-flex justify-content-between">
                                     <a href="{{ url()->previous() }}" class="btn btn-secondary">Back</a>
                                     <button type="submit" class="btn btn-primary">Save Changes</button>

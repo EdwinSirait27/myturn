@@ -11,6 +11,7 @@
         "doctrine/dbal": "^3.7",
         "guzzlehttp/guzzle": "^7.9",
         "laravel/breeze": "^1.19",
+        "laravel/fortify": "^1.27",
         "laravel/framework": "^10.0",
         "laravel/sanctum": "^3.0",
         "laravel/tinker": "^2.7",

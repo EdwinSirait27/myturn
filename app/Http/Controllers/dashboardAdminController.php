@@ -128,7 +128,7 @@ class dashboardAdminController extends Controller
     // }
     public function update(Request $request, $hashedId)
 {
-    Log::info('Masuk ke method update', ['hashedId' => $hashedId]);
+    Log::info('Going into method update', ['hashedId' => $hashedId]);
 
     $user = User::with('Terms', 'roles.permissions', 'Employee')->get()->first(function ($u) use ($hashedId) {
         $expectedHash = substr(hash('sha256', $u->id . env('APP_KEY')), 0, 8);
@@ -136,11 +136,11 @@ class dashboardAdminController extends Controller
     });
 
     if (!$user) {
-        Log::warning('User tidak ditemukan dengan hashedId', ['hashedId' => $hashedId]);
+        Log::warning('User not found with hashedId', ['hashedId' => $hashedId]);
         return redirect()->route('pages.dashboardAdmin')->with('error', 'ID tidak valid.');
     }
 
-    Log::info('User ditemukan', ['user_id' => $user->id]);
+    Log::info('User not found', ['user_id' => $user->id]);
 
     $validatedData = $request->validate([
         'device_lan_mac' => ['nullable', 'string', 'max:255', new NoXSSInput()],
@@ -159,7 +159,7 @@ class dashboardAdminController extends Controller
         'permissions' => ['nullable'],
     ]);
 
-    Log::info('Data berhasil divalidasi', ['validatedData' => $validatedData]);
+    Log::info('Validation success', ['validatedData' => $validatedData]);
 
     $userData = ['username' => $validatedData['username']];
     if (!empty($validatedData['password'])) {
@@ -170,7 +170,7 @@ class dashboardAdminController extends Controller
 
     try {
         $user->update($userData);
-        Log::info('User berhasil diupdate', ['user_id' => $user->id]);
+        Log::info('User updated successfully', ['user_id' => $user->id]);
 
         if ($user->Terms) {
             $user->Terms->update([
@@ -184,15 +184,13 @@ class dashboardAdminController extends Controller
             $user->Employee->update([
                 'status' => $validatedData['status'] ?? 'Active',
             ]);
-            Log::info('Employee status berhasil diupdate');
+            Log::info('Employee status has been updated');
         }
-
-        
    $user->syncRoles($validatedData['role']); // langsung array of role names
 
 
         DB::commit();
-        Log::info('Transaksi berhasil dikommit');
+        Log::info('Transaction commit');
 
         return redirect()->route('pages.dashboardAdmin')->with('success', 'User Berhasil Diupdate.');
     } catch (\Exception $e) {
@@ -340,7 +338,7 @@ class dashboardAdminController extends Controller
                 'regex:/^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/',
                 function ($attribute, $value, $fail) {
                     if ($value && Terms::where('device_lan_mac', $value)->whereNotNull('device_lan_mac')->exists()) {
-                        $fail("Alamat LAN MAC sudah terdaftar.");
+                        $fail(" LAN MAC Address already registered.");
                     }
                 },
             ],
@@ -351,7 +349,7 @@ class dashboardAdminController extends Controller
                 'regex:/^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/',
                 function ($attribute, $value, $fail) {
                     if ($value && Terms::where('device_wifi_mac', $value)->whereNotNull('device_wifi_mac')->exists()) {
-                        $fail("Alamat WiFi MAC sudah terdaftar.");
+                        $fail("WiFi MAC address already registered.");
                     }
                 },
             ],
@@ -392,11 +390,11 @@ class dashboardAdminController extends Controller
     $user->syncRoles($role);
 $user->syncPermissions($role->permissions); 
     DB::commit();
-            return redirect()->route('pages.dashboardAdmin')->with('success', 'User berhasil dibuat!');
+            return redirect()->route('pages.dashboardAdmin')->with('success', 'User Created Successfully!');
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()
-                ->withErrors(['error' => 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage()])
+                ->withErrors(['error' => 'theres some error while saving data: ' . $e->getMessage()])
                 ->withInput();
         }
     }

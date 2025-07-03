@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Event;
 use App\Models\Activity;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
+use Illuminate\Support\Facades\Session;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -18,11 +19,14 @@ class EventServiceProvider extends ServiceProvider
      * @var array<class-string, array<int, class-string>>
      */
     protected $listen = [
+        
+        
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],
         Login::class => [
             'App\Listeners\LogSuccessfulLogin',
+              \App\Listeners\SetActiveRoleSession::class,
         ],
         Logout::class => [
             'App\Listeners\LogSuccessfulLogout',

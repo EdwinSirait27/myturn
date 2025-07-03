@@ -212,6 +212,7 @@ HTML;
                     }
                 }
             ],
+           
             'description' => ['nullable', 'string', 'max:255', new NoXSSInput()],
         ]);
 

@@ -9,7 +9,7 @@
         </div>
         <ul class="sidebar-menu">
             <li class="menu-header">Menu</li>
-            @role('Admin')
+            @if (session('active_role') === 'Admin')
                 <li class="nav-item dropdown ">
                     <a href="#" class="nav-link has-dropdown" data-toggle="dropdown"><i class="fas fa-lock"></i>
                         <span>Users</span></a>
@@ -28,8 +28,10 @@
                         </li>
                     </ul>
                 </li>
-            @endrole
-            @role('HeadHR')
+            @endif
+            
+            @if (session('active_role') === 'HeadHR')
+
                 <li class="{{ Request::is('dashboardHR') ? 'active' : '' }}">
                     <a class="nav-link" href="{{ url('dashboardHR') }}"><i class="fas fa-house"></i>
                         <span>Dashboard</span></a>
@@ -93,7 +95,7 @@
 
                     </ul>
                 </li>
-            @endrole
+            @endif
             @if (session('active_role') === 'HR')
                 <li class="{{ Request::is('dashboardHR') ? 'active' : '' }}">
                     <a class="nav-link" href="{{ url('dashboardHR') }}"><i class="fas fa-house"></i>
@@ -135,8 +137,9 @@
                 </li>
             @endif
 
-            @role('HeadBuyer|Buyer')
-
+            {{-- @role('HeadBuyer|Buyer') --}}
+       @if (in_array(session('active_role'), ['HeadBuyer', 'Buyer']))
+       
             <li class="menu-header">Buyer Contoh</li>
             <li class="nav-item dropdown ">
                 <a href="#" class="nav-link has-dropdown" data-toggle="dropdown"><i class="fas fa-columns"></i>
@@ -148,14 +151,29 @@
                     <li class="{{ Request::is('Brands') ? 'active' : '' }}">
                         <a class="nav-link" href="{{ url('Brands') }}">Brands</a>
                     </li>
-                    <li class="{{ Request::is('Categories') ? 'active' : '' }}">
+                    {{-- <li class="{{ Request::is('Categories') ? 'active' : '' }}">
                         <a class="nav-link" href="{{ url('Categories') }}">Categories</a>
-                    </li>
+                    </li> --}}
                     <li class="{{ Request::is('Taxstatus') ? 'active' : '' }}">
                         <a class="nav-link" href="{{ url('Taxstatus') }}">Tax Status</a>
                     </li>
                     <li class="{{ Request::is('Statusproduct') ? 'active' : '' }}">
                         <a class="nav-link" href="{{ url('Statusproduct') }}">Status Product</a>
+                    </li>
+                    <li class="{{ Request::is('Depart') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ url('Depart') }}">Departments</a>
+                    </li>
+                    <li class="{{ Request::is('Cat') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ url('Cat') }}">Categories</a>
+                    </li>
+                    <li class="{{ Request::is('Subcat') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ url('Subcat') }}">Sub Categories</a>
+                    </li>
+                    <li class="{{ Request::is('Families') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ url('Families') }}">Families</a>
+                    </li>
+                    <li class="{{ Request::is('Subfamilies') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ url('Subfamilies') }}">Sub Families</a>
                     </li>
                 </ul>
             </li>
@@ -172,7 +190,7 @@
                 <a class="nav-link" href="{{ url('Masterproducts') }}"><i class="fas fa-house"></i>
                     <span>Master Products</span></a>
             </li>
-            @endrole
+            @endif
 
             {{-- <li class="{{ Request::is('blank-page') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ url('blank-page') }}"><i class="far fa-square"></i> <span>Blank
