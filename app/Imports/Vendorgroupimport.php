@@ -24,30 +24,6 @@ class Vendorgroupimport implements ToModel, WithHeadingRow, WithChunkReading,Wit
     public function model(array $row)
 {
   
-    //  $createdAt = null;
-    //     if (!empty($row['created_at'])) {
-    //         try {
-    //             $createdAt = is_numeric($row['created_at'])
-    //                 ? Date::excelToDateTimeObject($row['created_at'])->format('Y-m-d H:i:s')
-    //                 : Carbon::parse($row['created_at'])->format('Y-m-d H:i:s');
-    //         } catch (\Exception $e) {
-    //             Log::warning("Invalid created_at date: {$row['created_at']}");
-    //         }
-    //     }
-
-    //     $name = strtoupper(trim($row['name'] ?? ''));
-    //     // Skip jika name kosong
-    //     if (empty($name)) {
-    //         return null;
-    //     }
-    //     // Generate code jika kosong
-    //     $code = $row['code'] ?? $this->generateCode();
-    //     return new Vendorgroup([
-    //         'name' => $name,
-    //         'code' => $code,
-    //         'description' => $row['description'] ?? null,
-    //         'created_at' => $createdAt,
-    //     ]);
       $createdAt = null;
         if (!empty($row['created_at'])) {
             try {
@@ -73,18 +49,6 @@ class Vendorgroupimport implements ToModel, WithHeadingRow, WithChunkReading,Wit
     }
     public function rules(): array
     {
-        // return [
-        //     'name' => [
-        //         'required',
-        //         function ($attribute, $value, $fail) {
-        //             $upperName = strtoupper(trim($value));
-        //             $exists = Vendorgroup::whereRaw('UPPER(name) LIKE ?', ["%{$upperName}%"])->exists();
-        //             if ($exists) {
-        //                 $fail("Vendor Group Name \"$upperName\" already in database.");
-        //             }
-        //         }
-        //     ],
-        // ];
           return [
             '*.name' => [
                 'required',
